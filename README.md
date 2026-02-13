@@ -20,7 +20,7 @@
 - `cd ./backend`
 - `npm run dev`
 
-### Branching (To be discussed)
+### Branching
 - Run `git branch feature/FEATURENAME`
 - Run `git checkout feature/FEATURENAME`
 
