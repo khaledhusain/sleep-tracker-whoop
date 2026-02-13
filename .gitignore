@@ -1,0 +1,23 @@
+## Frontend ignores
+./frontend/logs
+./frontend/*.log
+./frontend/dist
+./frontend/dist-ssr
+./frontend/*.local
+
+## Backend ignores
+./backend/node_modules
+
+
+## General ignores
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.env
+*/node_modules
