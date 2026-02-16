@@ -2,7 +2,7 @@
 
 ## Project related help
 ### Setting project up for the first time
-- Run `git clone git@github.com:EllisOllier/sleep-tracker.git`
+- Run `git clone https://github.com/Sleep-Tracker-Thematic-Project/sleep-tracker.git`
 - Open project with vscode or code editor of choice
 - Run `cd ./frontend`
 - Run `npm install`
