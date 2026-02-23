@@ -3,7 +3,7 @@ const path = require(`path`);
 
 const dbPath = path.resolve(__dirname, `sleeptracker.db`);
 
-const db = new Database(dbPAth, { verbose: console.log });
+const db = new Database(dbPath, { verbose: console.log });
 
 console.log(`Connected to SQLite database`);
 

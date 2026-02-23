@@ -1,8 +1,9 @@
 const express = require('express');
-const morgan  = require('morgan');
+const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+const db = require(`./app/utils/database.js`);
 
 const app = express();
 app.use(cors());
@@ -24,7 +25,17 @@ app.use(bodyParser.json());
 
 // Root endpoint
 app.get('/', (req, res, next) => {
-    res.json({'status': 'Alive'});
+    res.json({ 'status': 'Alive' });
+});
+
+// DB health endpoint
+app.get('/dbhealth', (req, res) => {
+    try {
+        db.prepare('SELECT 1').get();
+        res.json({ status: 'ok', db: 'connected' });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
 });
 
 // Call routes here
