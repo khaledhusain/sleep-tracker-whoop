@@ -1,4 +1,4 @@
-const Database = require(`sqlite`);
+const Database = require(`sqlite3`);
 const path = require(`path`);
 
 const dbPath = path.resolve(__dirname, `sleeptracker.db`);
