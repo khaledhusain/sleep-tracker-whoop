@@ -49,4 +49,6 @@ const initDatabase = () => {
     });
 };
 
+initDatabase();
+
 module.exports = db;
