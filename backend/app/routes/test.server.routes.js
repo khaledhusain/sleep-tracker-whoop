@@ -1,4 +1,4 @@
-const test = require("../controllers/test.server.controller")
+const test = require("../controllers/test.server.controllers")
 
 module.exports = function(app){
     app.route("/test")
