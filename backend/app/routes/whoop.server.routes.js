@@ -2,16 +2,16 @@ const whoopController = require("../controllers/whoop.server.controller");
 const {whoopAuthMiddleware} = require("../middleware/whoopAuthMiddleware");
 
 module.exports = function (app) {
-  app.route("/connect")
+  app.route("/whoop/connect")
      .get(whoopController.getConnectUrl);
 
-  app.route("/callback")
+  app.route("/whoop/callback")
      .get(whoopController.handleCallback);
 
-  app.route("/refresh")
+  app.route("/whoop/refresh")
      .get(whoopAuthMiddleware, whoopController.refreshToken);
 
 
-  app.route("/sleep")
+  app.route("/whoop/sleep")
      .get(whoopAuthMiddleware, whoopController.syncSleep);
 };
