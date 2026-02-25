@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+const db = require(`./app/utils/database.js`);
 
 const app = express();
 app.use(cors());
@@ -39,7 +40,6 @@ app.get('/dbhealth', (req, res) => {
 
 // Call routes here
 require('./app/routes/test.server.routes')(app);
-require('./app/utils/database');
 
 // Default response for any other request
 app.use((req, res) => {
