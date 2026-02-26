@@ -85,7 +85,27 @@ const login = (req, res) => {
     })
 }
 
+const logout = (req, res) => {
+    let token = req.get("X-Authorization");
+    users.removeToken(token, err => {
+        if (err) return res.status(500).send({
+            "error_message": err,
+        })
+
+        if (!token) {
+            return res.status(401).send({
+                "error_message": "Missing session token!"
+            })
+        }
+
+        return res.status(200).send({
+            "message": "Successfully logged user out!",
+        })
+    })
+}
+
 module.exports = {
     create_account: create_account,
     login: login,
+    logout: logout
 }
