@@ -7,9 +7,9 @@ const getTokens = (done) => {
     WHERE id = ?
     `;
 
-    db.get(sql, (err, row) => {
-        if (err) return document(err);
-        return document(null, row);
+    db.get(sql, [1], (err, row) => {
+        if (err) return done(err);
+        return done(null, row);
     });
 };
 
@@ -24,13 +24,87 @@ const setTokens = (accessToken, refreshToken, expiresAt, done) => {
       updated_at = CURRENT_TIMESTAMP
     `;
 
-    db.run(sql, [accessToken, refreshToken, expiresAt, accessToken, refreshToken, expiresAt], function(err) {
+    db.run(sql, [1, accessToken, refreshToken, expiresAt, accessToken, refreshToken, expiresAt], function(err) {
         if (err) return done(err);
         return done(null, this.changes);
     });
 };
 
+const INSERT_SLEEP_SQL = `
+  INSERT INTO sleep_entries (
+    whoop_record_id, user_id, date, nap, bedtime, wake_time,
+    total_in_bed_minutes, total_sleep_duration_minutes,
+    light_sleep_minutes, deep_sleep_minutes, rem_sleep_minutes, awake_minutes,
+    sleep_performance_score, sleep_efficiency, sleep_consistency,
+    respiratory_rate
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ON CONFLICT(whoop_record_id) DO UPDATE SET
+    user_id = excluded.user_id,
+    date = excluded.date,
+    nap = excluded.nap,
+    bedtime = excluded.bedtime,
+    wake_time = excluded.wake_time,
+    total_in_bed_minutes = excluded.total_in_bed_minutes,
+    total_sleep_duration_minutes = excluded.total_sleep_duration_minutes,
+    light_sleep_minutes = excluded.light_sleep_minutes,
+    deep_sleep_minutes = excluded.deep_sleep_minutes,
+    rem_sleep_minutes = excluded.rem_sleep_minutes,
+    awake_minutes = excluded.awake_minutes,
+    sleep_performance_score = excluded.sleep_performance_score,
+    sleep_efficiency = excluded.sleep_efficiency,
+    sleep_consistency = excluded.sleep_consistency,
+    respiratory_rate = excluded.respiratory_rate,
+    updated_at = CURRENT_TIMESTAMP
+`;
+
+const hoursToMinutes = (h) => (h != null ? Math.round(Number(h) * 60) : null);
+
+const insertSleepEntries = (entries, done) => {
+  if (!entries || entries.length === 0) {
+    return done(null, 0);
+  }
+  let completed = 0;
+  let totalChanges = 0;
+  entries.forEach((entry) => {
+    const date = entry.start ? String(entry.start).split('T')[0] : null;
+    const params = [
+      String(entry.id),
+      entry.user_id,
+      date,
+      entry.nap ? 1 : 0,
+      entry.start || null,
+      entry.end || null,
+      hoursToMinutes(entry.total_in_bed_hours),
+      hoursToMinutes(entry.total_sleep_hours),
+      hoursToMinutes(entry.light_sleep_hours),
+      hoursToMinutes(entry.slow_wave_sleep_hours),
+      hoursToMinutes(entry.rem_sleep_hours),
+      entry.total_awake_minutes ?? null,
+      entry.sleep_performance ?? null,
+      entry.sleep_efficiency ?? null,
+      entry.sleep_consistency ?? null,
+      entry.respiratory_rate ?? null,
+    ];
+    db.run(INSERT_SLEEP_SQL, params, function (err) {
+      if (err) return done(err);
+      totalChanges += this.changes;
+      completed += 1;
+      if (completed === entries.length) return done(null, totalChanges);
+    });
+  });
+};
+
+const getSleepEntries = (done) => {
+  const sql = `SELECT * FROM sleep_entries`;
+  db.all(sql, [], (err, rows) => {
+    if (err) return done(err);
+    return done(null, rows || []);
+  });
+};
+
 module.exports = {
-    getTokens,
-    setTokens
+  getTokens,
+  setTokens,
+  insertSleepEntries,
+  getSleepEntries,
 };
