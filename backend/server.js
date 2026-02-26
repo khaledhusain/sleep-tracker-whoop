@@ -40,6 +40,7 @@ app.get('/dbhealth', (req, res) => {
 
 // Call routes here
 require('./app/routes/test.server.routes')(app);
+require('./app/routes/user.server.routes.js')(app);
 
 // Default response for any other request
 app.use((req, res) => {
