@@ -90,4 +90,6 @@ module.exports = {
     authenticateUser: authenticateUser,
     getToken: getToken,
     setToken: setToken,
+    getIdFromToken: getIdFromToken,
+    removeToken: removeToken,
 }
