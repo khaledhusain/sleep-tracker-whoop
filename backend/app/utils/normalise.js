@@ -23,14 +23,23 @@ function millisToHours(ms) {
         nap: sleep.nap,
   
         total_in_bed_hours: millisToHours(stage.total_in_bed_time_milli),
+        total_in_bed_minutes: millisToMinutes(stage.total_in_bed_time_milli),
+
         total_sleep_hours: millisToHours(totalSleepMillis),
+        total_sleep_minutes: millisToMinutes(totalSleepMillis),
+
         total_awake_minutes: millisToMinutes(stage.total_awake_time_milli),
   
         light_sleep_hours: millisToHours(stage.total_light_sleep_time_milli),
-        slow_wave_sleep_hours: millisToHours(stage.total_slow_wave_sleep_time_milli),
+        light_sleep_minutes: millisToMinutes(stage.total_light_sleep_time_milli),
+
+        deep_sleep_hours: millisToHours(stage.total_slow_wave_sleep_time_milli),
+        deep_sleep_minutes: millisToMinutes(stage.total_slow_wave_sleep_time_milli),
+
         rem_sleep_hours: millisToHours(stage.total_rem_sleep_time_milli),
+        rem_sleep_minutes: millisToMinutes(stage.total_rem_sleep_time_milli),
   
-        sleep_performance: sleep.score.sleep_performance_percentage,
+        sleep_performance_score: sleep.score.sleep_performance_percentage,
         sleep_efficiency: Math.round(sleep.score.sleep_efficiency_percentage),
         sleep_consistency: sleep.score.sleep_consistency_percentage,
   

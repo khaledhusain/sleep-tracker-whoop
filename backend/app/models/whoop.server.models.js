@@ -57,8 +57,6 @@ const INSERT_SLEEP_SQL = `
     updated_at = CURRENT_TIMESTAMP
 `;
 
-const hoursToMinutes = (h) => (h != null ? Math.round(Number(h) * 60) : null);
-
 const insertSleepEntries = (entries, done) => {
   if (!entries || entries.length === 0) {
     return done(null, 0);
@@ -74,13 +72,13 @@ const insertSleepEntries = (entries, done) => {
       entry.nap ? 1 : 0,
       entry.start || null,
       entry.end || null,
-      hoursToMinutes(entry.total_in_bed_hours),
-      hoursToMinutes(entry.total_sleep_hours),
-      hoursToMinutes(entry.light_sleep_hours),
-      hoursToMinutes(entry.slow_wave_sleep_hours),
-      hoursToMinutes(entry.rem_sleep_hours),
+      entry.total_in_bed_minutes,
+      entry.total_sleep_minutes,
+      entry.light_sleep_minutes,
+      entry.deep_sleep_minutes,
+      entry.rem_sleep_minutes,
       entry.total_awake_minutes ?? null,
-      entry.sleep_performance ?? null,
+      entry.sleep_performance_score ?? null,
       entry.sleep_efficiency ?? null,
       entry.sleep_consistency ?? null,
       entry.respiratory_rate ?? null,
