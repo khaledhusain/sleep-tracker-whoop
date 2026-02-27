@@ -4,28 +4,32 @@ const path = require('path');
 const dbPath = path.resolve(__dirname, 'sleeptracker.db');
 
 const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('Connection failed:', err.message);
-    } else {
-        console.log('Connected to SQLite database');
-    }
+  if (err) {
+    console.error('Connection failed:', err.message);
+  } else {
+    console.log('Connected to SQLite database');
+    initDatabase();
+  }
 });
 
 const initDatabase = () => {
-    db.serialize(() => {
-        db.run(`
+  db.serialize(() => {
+    db.run(`
       CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
+        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
         first_name TEXT,
         last_name TEXT,
+        email TEXT UNIQUE,
+        password TEXT,
+        salt TEXT,
+        session_token text,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT email_unique UNIQUE (email)
       )
     `, (err) => { if (err) console.error('Users table error:', err.message); });
 
-        db.run(`
+    db.run(`
       CREATE TABLE IF NOT EXISTS sleep_entries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         whoop_record_id TEXT UNIQUE,
