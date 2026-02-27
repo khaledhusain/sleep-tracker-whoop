@@ -1,9 +1,19 @@
-const test = (req, res) => {
-    return res.status(200).send({
-        "message": "Hello World!",
-    })
+const get_all_sleeps = (req, res) => {
+    
+}
+const get_sleep = (req, res) => {
+    
+}
+const delete_sleep = (req, res) => {
+    
+}
+const update_sleep = (req, res) => {
+    
 }
 
 module.exports = {
-    test: test,
+    get_all_sleeps,
+    get_sleep,
+    delete_sleep,
+    update_sleep
 }
