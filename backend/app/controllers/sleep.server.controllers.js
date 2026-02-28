@@ -1,7 +1,17 @@
 const joi = require(`joi`);
 
 const get_all_sleeps = (req, res) => {
-    
+    const getAllSleepsSchema = Joi.object({
+        start_date: Joi.date().iso().optional(),     
+        end_date: Joi.date().iso().optional(),
+    });
+
+    const { error } = getAllSleepsSchema.validate(req.body)
+    if (error) {
+        return res.status(400).send({
+            "error_message": error,
+        })
+    }
 }
 
 const get_sleep = (req, res) => {
