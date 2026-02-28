@@ -1,5 +1,9 @@
 const joi = require(`joi`);
 
+const create_sleep = (req, res) => {
+    
+}
+
 const get_all_sleeps = (req, res) => {
     const getAllSleepsSchema = Joi.object({
         start_date: Joi.date().iso().optional(),     
