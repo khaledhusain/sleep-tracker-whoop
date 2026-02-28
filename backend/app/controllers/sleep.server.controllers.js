@@ -39,22 +39,9 @@ const delete_sleep = (req, res) => {
         })
     }
 }
-const update_sleep = (req, res) => {
-    const updateSleepSchema = joi.object({
-        id: joi.number().integer().positive().required()
-    });
-
-    const { error } = updateSleepSchema.validate(req.body)
-    if (error) {
-        return res.status(400).send({
-            "error_message": error,
-        })
-    }
-}
 
 module.exports = {
     get_all_sleeps,
     get_sleep,
     delete_sleep,
-    update_sleep
 }
