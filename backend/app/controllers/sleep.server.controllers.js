@@ -55,7 +55,7 @@ const get_all_sleeps = (req, res) => {
     return res.status(400).json({ error_message: error.details[0].message });
   }
 
-  sleep.getAllSleeps(value, (err, rows) => {
+  sleep.getAllSleeps(value || {}, (err, rows) => {
     if (err) {
       return res.status(500).json({
         error_message: err.message || "Internal server error",

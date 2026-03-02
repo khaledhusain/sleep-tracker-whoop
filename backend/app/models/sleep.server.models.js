@@ -39,9 +39,28 @@ const createSleep = (sleep, done) => {
   });
 };
 
-const getAllSleeps = (done) => {
-  const query = `SELECT * FROM sleep_entries ORDER BY date DESC`;
-  db.all(query, [], (err, rows) => {
+const getAllSleeps = (filters, done) => {
+  let query = `SELECT * FROM sleep_entries`;
+  const values = [];
+  const where = [];
+
+  if (filters.start_date) {
+    where.push(`date >= ?`);
+    values.push(filters.start_date);
+  }
+
+  if (filters.end_date) {
+    where.push(`date <= ?`);
+    values.push(filters.end_date);
+  }
+
+  if (where.length > 0) {
+    query += ` WHERE ` + where.join(" AND ");
+  }
+
+  query += ` ORDER BY date DESC`;
+
+  db.all(query, values, (err, rows) => {
     if (err) return done(err);
     return done(null, rows || []);
   });
