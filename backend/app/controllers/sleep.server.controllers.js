@@ -20,21 +20,21 @@ const create_sleep = (req, res) => {
         respiratory_rate: Joi.number().optional(),
     });
 
-    const { error } = getAllSleepsSchema.validate(req.body);
+    const { error } = createSleepSchema.validate(req.body);
     if (error) {
         return res.status(400).send({
-            "error_message": error,
+            "error_message": error.details[0].message,
         })
     }
 
-    sleep.createSleep(req.body, (err, id) => {
+    sleep.createSleep(req.body, err => {
         if(err) return res.status(500).send({
-            "error_message": error,
+            "error_message": error.details[0].message,
         })
 
         if(err == 400) return res.status(400).send("Please provide date/bedtime/waketime");
 
-        return res.status(200).send({
+        return res.status(201).send({
             "message": "Successfully created sleep",
         })
     })
@@ -52,6 +52,18 @@ const get_all_sleeps = (req, res) => {
             "error_message": error,
         })
     }
+
+    sleep.getSleep(req.body, err => {
+        if(err) return res.status(500).send({
+            "error_message": error,
+        })
+
+        if(err == 400) return res.status(400).send("Please provide start date and/or end date");
+
+        return res.status(200).send({
+            "message": "Successfully created sleep",
+        })
+    })
 }
 
 const get_sleep = (req, res) => {
