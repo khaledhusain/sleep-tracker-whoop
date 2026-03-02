@@ -54,6 +54,33 @@ const get_sleep = (req, res) => {
     }
 }
 
+const update_sleep = (req, res) => {
+    const updateSleepSchema = Joi.object({
+        whoop_record_id: Joi.string().optional(),
+        date: Joi.date().iso().optional(),
+        nap: Joi.boolean().optional(),
+        bedtime: Joi.string().isoDate().optional(),
+        wake_time: Joi.string().isoDate().optional(),
+        total_in_bed_minutes: Joi.number().integer().min(0).optional(),
+        total_sleep_duration_minutes: Joi.number().integer().min(0).optional(),
+        light_sleep_minutes: Joi.number().integer().min(0).optional(),
+        deep_sleep_minutes: Joi.number().integer().min(0).optional(),
+        rem_sleep_minutes: Joi.number().integer().min(0).optional(),
+        awake_minutes: Joi.number().integer().min(0).optional(),
+        sleep_performance_score: Joi.number().integer().min(0).optional(),
+        sleep_efficiency: Joi.number().integer().min(0).optional(),
+        sleep_consistency: Joi.number().integer().min(0).optional(),
+        respiratory_rate: Joi.number().optional(),
+    });
+
+    const { error } = getAllSleepsSchema.validate(req.body);
+    if (error) {
+        return res.status(400).send({
+            "error_message": error,
+        })
+    }
+}
+
 const delete_sleep = (req, res) => {
     const deleteSleepSchema = Joi.object({
         id: Joi.number().integer().positive().required()
@@ -71,5 +98,6 @@ module.exports = {
     get_all_sleeps,
     get_sleep,
     delete_sleep,
-    create_sleep
+    create_sleep,
+    update_sleep
 }
