@@ -47,7 +47,16 @@ const getAllSleeps = (done) => {
   });
 };
 
+const getSleep = (id, done) => {
+  const query = `SELECT * FROM sleep_entries WHERE id = ?`;
+  db.get(query, [id], (err, row) => {
+    if (err) return done(err);
+    return done(null, row || null);
+  });
+};
+
 module.exports = {
     createSleep,
     getAllSleeps,
+    getSleep,
 };
