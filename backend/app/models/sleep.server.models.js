@@ -105,9 +105,18 @@ const updateSleep = (id, sleep, done) => {
   });
 };
 
+const deleteSleep = (id, done) => {
+  const query = `DELETE FROM sleep_entries WHERE id = ?`;
+  db.run(query, [id], function (err) {
+    if (err) return done(err);
+    return done(null, this.changes);
+  });
+};
+
 module.exports = {
     createSleep,
     getAllSleeps,
     getSleep,
     updateSleep,
+    deleteSleep,
 };
