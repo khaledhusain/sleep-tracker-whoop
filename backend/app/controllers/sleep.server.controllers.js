@@ -36,7 +36,7 @@ const create_sleep = (req, res) => {
 
     return res.status(201).json({
       message: "Successfully created sleep",
-      id, // if your model returns it
+      id: id,
     });
   });
 };
@@ -62,7 +62,6 @@ const get_all_sleeps = (req, res) => {
   });
 };
 
-// recommend route: GET /sleep/:id
 const get_sleep = (req, res) => {
   const schema = Joi.object({
     id: Joi.number().integer().positive().required(),
