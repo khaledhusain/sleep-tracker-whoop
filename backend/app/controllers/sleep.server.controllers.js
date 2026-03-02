@@ -6,10 +6,8 @@ const create_sleep = (req, res) => {
     whoop_record_id: Joi.string().optional(),
     date: Joi.date().iso().required(),
     nap: Joi.boolean().optional(),
-
     bedtime: Joi.date().iso().required(),
     wake_time: Joi.date().iso().greater(Joi.ref("bedtime")).required(),
-
     total_in_bed_minutes: Joi.number().integer().min(0).optional(),
     total_sleep_duration_minutes: Joi.number().integer().min(0).optional(),
     light_sleep_minutes: Joi.number().integer().min(0).optional(),
@@ -27,7 +25,12 @@ const create_sleep = (req, res) => {
     return res.status(400).json({ error_message: error.details[0].message });
   }
 
-  sleep.createSleep(value, (err, id) => {
+  const sleepToCreate = {
+    ...value,
+    user_id: req.user_id,
+  };
+
+  sleep.createSleep(sleepToCreate, (err, id) => {
     if (err) {
       return res.status(500).json({
         error_message: err.message || "Internal server error",
@@ -36,7 +39,7 @@ const create_sleep = (req, res) => {
 
     return res.status(201).json({
       message: "Successfully created sleep",
-      id: id,
+      id,
     });
   });
 };
