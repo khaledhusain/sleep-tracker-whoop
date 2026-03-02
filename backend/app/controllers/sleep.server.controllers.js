@@ -1,5 +1,5 @@
 const Joi = require(`joi`);
-const sleep = require(`../models/sleep.server.models`)
+const sleep = require(`../models/sleep.server.models`);
 
 const create_sleep = (req, res) => {
     const createSleepSchema = Joi.object({
@@ -21,6 +21,7 @@ const create_sleep = (req, res) => {
     });
 
     const { error } = createSleepSchema.validate(req.body);
+
     if (error) {
         return res.status(400).send({
             "error_message": error.details[0].message,
@@ -44,25 +45,22 @@ const get_all_sleeps = (req, res) => {
     const getAllSleepsSchema = Joi.object({
         start_date: Joi.date().iso().optional(),     
         end_date: Joi.date().iso().optional(),
-    });
+    }).unknown(false);
 
-    const { error } = getAllSleepsSchema.validate(req.body)
+    const { error,value } = getAllSleepsSchema.validate(req.query);
+
     if (error) {
         return res.status(400).send({
-            "error_message": error,
+            "error_message": error.details[0].message,
         })
     }
 
-    sleep.getSleep(req.body, err => {
-        if(err) return res.status(500).send({
-            "error_message": error,
+    sleep.getAllSleeps(value, (err, rows) => {
+        if(err) return res.status(500).json({
+            "error_message": err.message || "Internal server error",
         })
 
-        if(err == 400) return res.status(400).send("Please provide start date and/or end date");
-
-        return res.status(200).send({
-            "message": "Successfully created sleep",
-        })
+        return res.status(200).send(rows);
     })
 }
 
@@ -71,7 +69,7 @@ const get_sleep = (req, res) => {
         id: Joi.number().integer().positive().required()
     });
 
-    const { error } = getSleepSchema.validate(req.body)
+    const { error } = getSleepSchema.validate(req.body);
     if (error) {
         return res.status(400).send({
             "error_message": error,
