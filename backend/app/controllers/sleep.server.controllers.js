@@ -142,17 +142,36 @@ const update_sleep = (req, res) => {
 };
 
 const delete_sleep = (req, res) => {
-    const deleteSleepSchema = Joi.object({
-        id: Joi.number().integer().positive().required()
-    });
+  const deleteSleepSchema = Joi.object({
+    id: Joi.number().integer().positive().required(),
+  }).unknown(false);
 
-    const { error } = deleteSleepSchema.validate(req.body)
-    if (error) {
-        return res.status(400).send({
-            "error_message": error,
-        })
+  const { error, value } = deleteSleepSchema.validate(req.params);
+
+  if (error) {
+    return res.status(400).json({
+      error_message: error.details[0].message,
+    });
+  }
+
+  sleep.deleteSleep(value.id, (err, changes) => {
+    if (err) {
+      return res.status(500).json({
+        error_message: err.message || "Internal server error",
+      });
     }
-}
+
+    if (!changes) {
+      return res.status(404).json({
+        error_message: "Sleep not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Successfully deleted sleep",
+    });
+  });
+};
 
 module.exports = {
     get_all_sleeps,
