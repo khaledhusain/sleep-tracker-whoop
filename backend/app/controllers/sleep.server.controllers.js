@@ -26,6 +26,18 @@ const create_sleep = (req, res) => {
             "error_message": error,
         })
     }
+
+    sleep.createSleep(req.body, (err, id) => {
+        if(err) return res.status(500).send({
+            "error_message": error,
+        })
+
+        if(err == 400) return res.status(400).send("Please provide date/bedtime/waketime");
+
+        return res.status(200).send({
+            "message": "Successfully created sleep",
+        })
+    })
 }
 
 const get_all_sleeps = (req, res) => {
