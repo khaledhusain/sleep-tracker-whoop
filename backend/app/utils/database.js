@@ -38,10 +38,10 @@ const initDatabase = () => {
         nap INTEGER DEFAULT 0,
         bedtime TEXT NOT NULL,
         wake_time TEXT NOT NULL,
-        total_in_bed_minutEes INTEGER,
+        total_in_bed_minutes INTEGER,
         total_sleep_duration_minutes INTEGER,
         light_sleep_minutes INTEGER,
-        deep_sleep_minutes INTEGR,
+        deep_sleep_minutes INTEGER,
         rem_sleep_minutes INTEGER,
         awake_minutes INTEGER,
         sleep_performance_score INTEGER,
@@ -50,7 +50,7 @@ const initDatabase = () => {
         respiratory_rate REAL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
       )
     `, (err) => { if (err) console.error('Sleep entries table error:', err.message); });
 
