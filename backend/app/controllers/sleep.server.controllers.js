@@ -29,8 +29,8 @@ const create_sleep = (req, res) => {
     }
 
     sleep.createSleep(req.body, err => {
-        if(err) return res.status(500).send({
-            "error_message": error.details[0].message,
+        if(err) return res.status(500).json({
+            "error_message": err.message || "Internal server error",
         })
 
         if(err == 400) return res.status(400).send("Please provide date/bedtime/waketime");
@@ -65,17 +65,34 @@ const get_all_sleeps = (req, res) => {
 }
 
 const get_sleep = (req, res) => {
-    const getSleepSchema = Joi.object({
-        id: Joi.number().integer().positive().required()
-    });
+  const getSleepSchema = Joi.object({
+    id: Joi.number().integer().positive().required(),
+  }).unknown(false);
 
-    const { error } = getSleepSchema.validate(req.body);
-    if (error) {
-        return res.status(400).send({
-            "error_message": error,
-        })
+  const { error, value } = getSleepSchema.validate(req.query);
+
+  if (error) {
+    return res.status(400).json({
+      error_message: error.details[0].message,
+    });
+  }
+
+  sleep.getSleep(value.id, (err, row) => {
+    if (err) {
+      return res.status(500).json({
+        error_message: err.message || "Internal server error",
+      });
     }
-}
+
+    if (!row) {
+      return res.status(404).json({
+        error_message: "Sleep not found",
+      });
+    }
+
+    return res.status(200).json(row);
+  });
+};
 
 const update_sleep = (req, res) => {
     const updateSleepSchema = Joi.object({
