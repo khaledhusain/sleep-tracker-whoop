@@ -39,6 +39,15 @@ const createSleep = (sleep, done) => {
   });
 };
 
+const getAllSleeps = (done) => {
+  const query = `SELECT * FROM sleep_entries ORDER BY date DESC`;
+  db.all(query, [], (err, rows) => {
+    if (err) return done(err);
+    return done(null, rows || []);
+  });
+};
+
 module.exports = {
-  createSleep,
+    createSleep,
+    getAllSleeps,
 };
