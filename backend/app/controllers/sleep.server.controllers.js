@@ -7,7 +7,7 @@ const create_sleep = (req, res) => {
         date: Joi.date().iso().required(),
         nap: Joi.boolean().optional(),
         bedtime: Joi.string().isoDate().required(),
-        wake_time: Joi.string().isoDate().required(),
+        wake_time: Joi.date().iso().greater(Joi.ref("bedtime")).required(),
         total_in_bed_minutes: Joi.number().integer().min(0).optional(),
         total_sleep_duration_minutes: Joi.number().integer().min(0).optional(),
         light_sleep_minutes: Joi.number().integer().min(0).optional(),
