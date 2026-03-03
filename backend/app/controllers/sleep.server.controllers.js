@@ -4,10 +4,10 @@ const sleep = require("../models/sleep.server.models");
 const create_sleep = (req, res) => {
   const createSleepSchema = Joi.object({
     whoop_record_id: Joi.string().optional(),
-    date: Joi.string().iso().required(),
+    date: Joi.date().iso().required(),
     nap: Joi.boolean().optional(),
-    bedtime: Joi.string().iso().required(),
-    wake_time: Joi.string().iso().greater(Joi.ref("bedtime")).required(),
+    bedtime: Joi.date().iso().required(),
+    wake_time: Joi.date().iso().greater(Joi.ref("bedtime")).required(),
     total_in_bed_minutes: Joi.number().integer().min(0).optional(),
     total_sleep_duration_minutes: Joi.number().integer().min(0).optional(),
     light_sleep_minutes: Joi.number().integer().min(0).optional(),
@@ -91,11 +91,11 @@ const update_sleep = (req, res) => {
 
   const bodySchema = Joi.object({
     whoop_record_id: Joi.string().optional(),
-    date: Joi.string().iso().optional(),
+    date: Joi.date().iso().optional(),
     nap: Joi.boolean().optional(),
 
-    bedtime: Joi.string().iso().optional(),
-    wake_time: Joi.string().iso().optional(),
+    bedtime: Joi.date().iso().optional(),
+    wake_time: Joi.date().iso().optional(),
 
     total_in_bed_minutes: Joi.number().integer().min(0).optional(),
     total_sleep_duration_minutes: Joi.number().integer().min(0).optional(),
