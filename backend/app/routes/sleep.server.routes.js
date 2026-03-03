@@ -8,4 +8,5 @@ module.exports = function(app){
     app.route("/sleep/:id")
         .get(authMiddleware.authenticate, sleep.get_sleep)
         .delete(authMiddleware.authenticate, sleep.delete_sleep)
+        .patch(authMiddleware.authenticate, sleep.update_sleep);
 }

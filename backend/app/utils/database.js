@@ -50,7 +50,7 @@ const initDatabase = () => {
         respiratory_rate REAL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
       )
     `, (err) => { if (err) console.error('Sleep entries table error:', err.message); });
 
