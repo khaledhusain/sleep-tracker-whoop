@@ -55,11 +55,9 @@ const get_all_sleeps = (req, res) => {
     return res.status(400).json({ error_message: error.details[0].message });
   }
 
-  sleep.getAllSleeps(value || {}, (err, rows) => {
+  sleep.getAllSleeps(req.user_id, value || {}, (err, rows) => {
     if (err) {
-      return res.status(500).json({
-        error_message: err.message || "Internal server error",
-      });
+      return res.status(500).json({ error_message: err.message || "Internal server error" });
     }
     return res.status(200).json(rows);
   });
@@ -75,11 +73,9 @@ const get_sleep = (req, res) => {
     return res.status(400).json({ error_message: error.details[0].message });
   }
 
-  sleep.getSleep(value.id, (err, row) => {
+  sleep.getSleep(req.user_id, value.id, (err, row) => {
     if (err) {
-      return res.status(500).json({
-        error_message: err.message || "Internal server error",
-      });
+      return res.status(500).json({ error_message: err.message || "Internal server error" });
     }
     if (!row) {
       return res.status(404).json({ error_message: "Sleep not found" });
@@ -162,7 +158,7 @@ const delete_sleep = (req, res) => {
     return res.status(400).json({ error_message: error.details[0].message });
   }
 
-  sleep.deleteSleep(value.id, (err, changes) => {
+  sleep.deleteSleep(req.user_id, value.id, (err, changes) => {
     if (err) {
       return res.status(500).json({ error_message: err.message || "Internal server error" });
     }

@@ -39,10 +39,13 @@ const createSleep = (sleep, done) => {
   });
 };
 
-const getAllSleeps = (filters, done) => {
+const getAllSleeps = (user_id, filters, done) => {
   let query = `SELECT * FROM sleep_entries`;
   const values = [];
   const where = [];
+
+  where.push(`user_id = ?`);
+  values.push(user_id);
 
   if (filters.start_date) {
     where.push(`date >= ?`);
@@ -54,10 +57,7 @@ const getAllSleeps = (filters, done) => {
     values.push(filters.end_date);
   }
 
-  if (where.length > 0) {
-    query += ` WHERE ` + where.join(" AND ");
-  }
-
+  query += ` WHERE ` + where.join(" AND ");
   query += ` ORDER BY date DESC`;
 
   db.all(query, values, (err, rows) => {
@@ -66,9 +66,9 @@ const getAllSleeps = (filters, done) => {
   });
 };
 
-const getSleep = (id, done) => {
-  const query = `SELECT * FROM sleep_entries WHERE id = ?`;
-  db.get(query, [id], (err, row) => {
+const getSleep = (user_id, id, done) => {
+  const query = `SELECT * FROM sleep_entries WHERE id = ? AND user_id = ?`;
+  db.get(query, [id, user_id], (err, row) => {
     if (err) return done(err);
     return done(null, row || null);
   });
@@ -168,9 +168,9 @@ const updateSleep = (id, user_id, sleep, done) => {
   });
 };
 
-const deleteSleep = (id, done) => {
-  const query = `DELETE FROM sleep_entries WHERE id = ?`;
-  db.run(query, [id], function (err) {
+const deleteSleep = (user_id, id, done) => {
+  const query = `DELETE FROM sleep_entries WHERE id = ? AND user_id = ?`;
+  db.run(query, [id, user_id], function (err) {
     if (err) return done(err);
     return done(null, this.changes);
   });
