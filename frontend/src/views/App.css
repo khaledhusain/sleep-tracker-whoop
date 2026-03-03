@@ -1,3 +1,6 @@
+/* index.css imports tailwind */
+/* if we are using tailwind do we need .css for each file? (i have never used react) but in vue all css is in the single file - Ace */
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
