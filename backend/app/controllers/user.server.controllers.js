@@ -4,19 +4,21 @@ const joi = require('joi');
 const create_account = (req, res) => {
     const schema = joi.object({
         first_name: joi.string()
+            .pattern(/^([^0-9]*)$/)
             .required(),
 
         last_name: joi.string()
+            .pattern(/^([^0-9]*)$/)
             .required(),
 
         email: joi.string()
             .required()
-            .email({ minDomainSegments: 2, tlds: { allow: ['com', 'co'] } }),
+            .email(),
 
         password: joi.string()
             .min(8)
             .max(16)
-            .pattern(new RegExp('^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9!_@.#&+]{8,16}$'))
+            .pattern(new RegExp('^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!_@.#&+])[a-zA-Z0-9!_@.#&+]{8,16}$'))
             .required(),
     })
 
