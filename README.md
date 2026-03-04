@@ -32,9 +32,11 @@
 - Check any conflicts and ensure nothing is overwritten that shouldn't be
 
 ### Running unit tests
-- Delete the existing `sleeptracker.db` in `/backend/app/utils/sleeptracker.db`
 - Run the backend (commands above for running backend)
-- Run `npm run test` in root project directory
+  - Run `npm run clean-test` in root project directory
+- OR Delete the existing `sleeptracker.db` in `/backend/app/utils/sleeptracker.db`
+  - Run the backend (commands above for running backend)
+  - Run `npm run test` in root project directory
 - Tests will output to the console with details
 
 ## Team Members
