@@ -12,6 +12,8 @@ describe('POST /user/logout - invalid session_token', () => {
     })
 })
 
+// maybe update so error checks for missing token rather than calling it invalid
+// depends as a missing token is still invalid
 describe('POST /user/logout - missing session_token', () => {
     it("should return 401 no user with the token is found", async () => {
         const response = await request(app)
