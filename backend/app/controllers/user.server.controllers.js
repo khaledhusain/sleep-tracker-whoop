@@ -65,7 +65,7 @@ const login = (req, res) => {
     }
 
     users.authenticateUser(req.body.email, req.body.password, (err, id) => {
-        if (err === 400) return res.status(400).send("Invalid email/password!");
+        if (err === 404) return res.status(404).send({"error_message": "Invalid email/password!"});
         if (err) return res.status(500).send({ "error": err });
 
         users.getToken(id, (err, token) => {
