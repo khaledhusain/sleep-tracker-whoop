@@ -1,7 +1,7 @@
 const request = require("supertest");
 const app = require("../server");
 
-describe('POST /user/logout', () => {
+describe('POST /user/logout - invalid session_token', () => {
     it("should return 401 no user with the token is found", async () => {
         const response = await request(app)
             .post('/user/logout')
@@ -12,7 +12,7 @@ describe('POST /user/logout', () => {
     })
 })
 
-describe('POST /user/logout', () => {
+describe('POST /user/logout - missing session_token', () => {
     it("should return 401 no user with the token is found", async () => {
         const response = await request(app)
             .post('/user/logout')
