@@ -1,5 +1,5 @@
 const request = require("supertest");
-const app = require("../../server");
+const {app, db} = require("../../server");
 
 describe('POST /user/login - missing email field', () => {
     it("should return 400 with error_message and validation error details", async () => {
@@ -63,3 +63,6 @@ describe('POST /user/login - incorrect email', () => {
     })
 })
 
+afterAll(async () => {
+    await db.close(); 
+});

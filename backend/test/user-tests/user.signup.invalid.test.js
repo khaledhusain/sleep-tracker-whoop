@@ -1,5 +1,5 @@
 const request = require("supertest");
-const app = require("../../server");
+const {app, db} = require("../../server");
 
 describe('POST /user/create_account - missing first_name field', () => {
     it("should return 400 with error_message and validation details", async () => {
@@ -195,3 +195,7 @@ describe('POST /user/create_account - invalid password, missing numbers', () => 
         expect(response.body).toHaveProperty('error_message');
     });
 })
+
+afterAll(async () => {
+    await db.close(); 
+});

@@ -1,5 +1,5 @@
 const request = require("supertest");
-const app = require("../../server");
+const {app, db} = require("../../server");
 
 let session_token = "";
 
@@ -52,3 +52,6 @@ describe('POST /user/logout', () => {
     })
 })
 
+afterAll(async () => {
+    await db.close(); 
+});
