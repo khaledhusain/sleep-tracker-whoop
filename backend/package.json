@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "clean-test": "rm ./app/utils/sleeptracker.db && jest",
+    "test": "jest --detectOpenHandles",
+    "clean-test": "rm ./app/utils/sleeptracker.db && jest --detectOpenHandles",
     "dev": "nodemon server.js"
   },
   "keywords": [],
