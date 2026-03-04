@@ -50,3 +50,5 @@ require(`./app/routes/sleep.server.routes.js`)(app);
 app.use((req, res) => {
     res.sendStatus(404);
 });
+
+module.exports = app;
