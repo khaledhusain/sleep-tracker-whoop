@@ -38,6 +38,7 @@
 
 <script>
 import EmailValidator from 'email-validator';
+import { userService } from '@/services/user.service';
 
 export default {
     data() {
@@ -63,6 +64,18 @@ export default {
                 this.error = "Email must be valid";
                 return;
             }
+
+            userService.login(email, password)
+                .then(() => {
+                    this.submitted = false;
+                    this.error = "";
+                    //localStorage.setItem("successMsg", "Login successful!");
+                    this.$router.push("/");
+                })
+                .catch(error => {
+                    this.error = error;
+                    this.submitted = false;
+                })
         }
     }
 }

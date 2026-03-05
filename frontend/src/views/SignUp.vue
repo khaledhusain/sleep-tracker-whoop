@@ -9,14 +9,14 @@
                 <div>
                     <input
                         class="block bg-grey-3 rounded p-1.5 placeholder-blue-4 focus:ring-2 focus:ring-blue-4 focus:outline-none text-blue-3"
-                        v-model="FirstName" placeholder="First name">
-                    <div v-show="submitted && !FirstName">First name is required</div>
+                        v-model="firstName" placeholder="First name">
+                    <div v-show="submitted && !firstName">First name is required</div>
                 </div>
                 <div>
                     <input
                         class="block bg-grey-3 rounded p-1.5 placeholder-blue-4 focus:ring-2 focus:ring-blue-4 focus:outline-none text-blue-3"
-                        v-model="LastName" placeholder="Last name">
-                    <div v-show="submitted && !LastName">Last name is required</div>
+                        v-model="lastName" placeholder="Last name">
+                    <div v-show="submitted && !lastName">Last name is required</div>
                 </div>
             </div>
 
@@ -25,8 +25,8 @@
             <div>
                 <input
                     class="block bg-grey-3 rounded w-101 p-1.5 placeholder-blue-4 focus:ring-2 focus:ring-blue-4 focus:outline-none text-blue-3"
-                    v-model="Email" placeholder="Email">
-                <div v-show="submitted && !Email">Email is required</div>
+                    v-model="email" placeholder="Email">
+                <div v-show="submitted && !email">Email is required</div>
             </div>
 
             <br />
@@ -34,8 +34,8 @@
             <div>
                 <input
                     class="block bg-grey-3 rounded w-101 p-1.5 placeholder-blue-4 focus:ring-2 focus:ring-blue-4 focus:outline-none text-blue-3"
-                    v-model="Password" placeholder="Password">
-                <div v-show="submitted && !Password">Password is required</div>
+                    v-model="password" placeholder="Password">
+                <div v-show="submitted && !password">Password is required</div>
             </div>
 
             <router-link to="/login" class="hover:text-purple mt-3">
@@ -56,15 +56,16 @@
 </template>
 
 <script>
-import EmailValidator from 'email-validator';
+import emailValidator from 'email-validator';
+import { userService } from '@/services/user.service';
 
 export default {
     data() {
         return {
-            FirstName: "",
-            LastName: "",
-            Email: "",
-            Password: "",
+            firstName: "",
+            lastName: "",
+            email: "",
+            password: "",
             submitted: false,
             error: ""
         }
@@ -74,16 +75,27 @@ export default {
             this.submitted = true;
             this.error = "";
 
-            const {FirstName, LastName, Email, Password } = this;
+            const { firstName, lastName, email, password } = this;
 
-            if (!(FirstName && LastName && Email && Password)) {
+            if (!(firstName && lastName && email && password)) {
                 return;
             }
 
-            if (!(EmailValidator.validate(Email))) {
+            if (!(emailValidator.validate(email))) {
                 this.error = "Email must be valid";
                 return;
             }
+
+            userService.signUp(firstName, lastName, email, password)
+                .then(() => {
+                    //localStorage.setItem("successMsg", "Account created successfully");
+                    //this.$router.push("/login");
+                    this.error = "";
+                })
+                .catch(error => {
+                    this.error = error;
+                    this.submitted = false;
+                })
         }
     }
 }
