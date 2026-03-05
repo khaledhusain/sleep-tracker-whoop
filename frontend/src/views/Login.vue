@@ -20,7 +20,7 @@
             </div>
 
 
-            <router-link to="/" class="hover:text-purple mt-3">
+            <router-link to="/signup" class="hover:text-purple mt-3">
                 Don't have an account? Sign up
             </router-link>
 
