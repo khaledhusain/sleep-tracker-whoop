@@ -1,5 +1,5 @@
 <template>
-  <div class="antialiased text-white bg-blue-2 p-5">
+  <div class="antialiased text-white bg-blue-2 p-5 font-Montserrat">
 
     <!-- nav bar -->
     <div class="flex items-center justify-between pb-5">
