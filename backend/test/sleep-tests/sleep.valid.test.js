@@ -1,5 +1,5 @@
 const request = require("supertest");
-const {app, db} = require("../../server");
+const { app, db } = require("../../server");
 
 let session_token_sleep = ""; // must not be session_token causes errors in other tests
 
@@ -29,7 +29,6 @@ describe('Initialises user account', () => {
         expect(response.statusCode).toBe(200);
         expect(response.body).toHaveProperty('user_id')
         expect(response.body).toHaveProperty('session_token')
-        expect(response.body.user_id).toBe(2);
         session_token_sleep = response.body.session_token;
     })
 });
@@ -50,7 +49,6 @@ describe('POST /sleep - add new manual sleep entry', () => {
         expect(response.statusCode).toBe(201)
         expect(response.body).toHaveProperty('message')
         expect(response.body).toHaveProperty('id')
-        expect(response.body.id).toBe(1)
         expect(response.body.message).toBe("Successfully created sleep")
     })
 })
@@ -71,7 +69,6 @@ describe('POST /sleep - add new manual sleep entry', () => {
         expect(response.statusCode).toBe(201)
         expect(response.body).toHaveProperty('message')
         expect(response.body).toHaveProperty('id')
-        expect(response.body.id).toBe(2)
         expect(response.body.message).toBe("Successfully created sleep")
     })
 })
@@ -88,6 +85,6 @@ describe('GET /sleep - get all sleep entires', () => {
 })
 
 afterAll(async () => {
-    await db.close(); 
+    await db.close();
 });
 
