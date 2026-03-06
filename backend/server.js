@@ -35,8 +35,11 @@ app.use((req, res) => {
 });
 
 const HTTP_PORT = 3333;
-app.listen(HTTP_PORT, () => {
-    console.log('Server running on port: ' + HTTP_PORT);
-});
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(HTTP_PORT, () => {
+        console.log('Server running on port: ' + HTTP_PORT);
+    });
+}
+
 
 module.exports = { app, db };
