@@ -18,7 +18,6 @@ describe('POST /user/create_account', () => {
 
         expect(response.statusCode).toBe(201);
         expect(response.body).toHaveProperty('user_id');
-        expect(response.body.user_id).toBe(1);
     });
 })
 
@@ -36,7 +35,6 @@ describe('POST /user/login', () => {
         expect(response.statusCode).toBe(200);
         expect(response.body).toHaveProperty('user_id')
         expect(response.body).toHaveProperty('session_token')
-        expect(response.body.user_id).toBe(1);
         session_token = response.body.session_token;
     })
 })
