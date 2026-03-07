@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen bg-blue-1 text-white relative overflow-hidden flex flex-col items-center justify-center font-Montserrat">
     
+    <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-purple rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-pulse"></div>
     <div class="absolute bottom-[-10%] right-[-10%] w-64 h-64 bg-blue-4 rounded-full mix-blend-screen filter blur-[100px] opacity-20"></div>
     
     <div class="w-full max-w-md h-full min-h-screen flex flex-col justify-between p-8 z-10">
