@@ -60,4 +60,17 @@
 </template>
 
 <script setup>
+// import { onMounted } from 'vue';
+// import { useRouter } from 'vue-router';
+
+//const router = useRouter();
+
+//onMounted(() => {
+  //const token = localStorage.getItem('sessionToken');
+  
+  //if (token) {
+    // Change this to whatever the homepage is called when that has been implemented
+    //router.push('/dashboard'); 
+  //}
+//});
 </script>
