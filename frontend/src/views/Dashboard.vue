@@ -75,19 +75,16 @@ import { fetchSleepData } from '../services/sleep.service';
 const sleepData = ref([]);
 const selectedTimeframe = ref('week');
 
-// Computed labels
 const timeframeLabel = computed(() => {
   const map = { week: 'Past 7 Days', month: 'Past 30 Days', year: 'Past Year' };
   return map[selectedTimeframe.value];
 });
 
-// Grab "last night's" sleep (assumes the latest chronological entry in the fetched data)
 const lastNight = computed(() => {
   if (!sleepData.value.length) return null;
   return [...sleepData.value].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
 });
 
-// Calculate Averages
 const stats = computed(() => {
   const data = sleepData.value;
   if (!data.length) return { avgDuration: 0, avgQuality: 0, avgConsistency: 0, avgBedtime: null };
@@ -108,7 +105,6 @@ const stats = computed(() => {
 
   const count = data.length;
   
-  // Create an average bedtime date object
   const avgBedtimeMins = Math.floor(bedtimeSum / count);
   const avgBedtimeDate = new Date();
   avgBedtimeDate.setHours(Math.floor(avgBedtimeMins / 60), avgBedtimeMins % 60, 0);
@@ -121,7 +117,6 @@ const stats = computed(() => {
   };
 });
 
-// Formatting Utilities
 const formatDuration = (minutes) => {
   if (!minutes) return '0h 0m';
   const h = Math.floor(minutes / 60);
@@ -137,16 +132,43 @@ const formatTime = (dateString) => {
 
 const getScoreColor = (score) => {
   if (!score) return 'text-grey-2';
-  if (score >= 85) return 'text-[#4ade80]'; // Greenish
-  if (score >= 70) return 'text-yellow';    // Extracted from your style.css
-  return 'text-[#f87171]';                  // Reddish
+  if (score >= 85) return 'text-[#4ade80]'; 
+  if (score >= 70) return 'text-yellow';    
+  return 'text-[#f87171]';                 
 };
 
-// Data Fetching Logic
 const loadData = async () => {
   const token = localStorage.getItem('sessionToken');
-  if (!token) return; // Add router push to login here in actual app
 
+  // --- START FAKE DATA BLOCK ---
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  sleepData.value = [
+    {
+      id: 1,
+      date: today.toISOString(),
+      bedtime: new Date(new Date(yesterday).setHours(22, 30, 0)).toISOString(),
+      wake_time: new Date(new Date(today).setHours(6, 45, 0)).toISOString(),
+      total_sleep_duration_minutes: 495, // 8h 15m
+      sleep_performance_score: 92,
+      sleep_consistency: 88
+    },
+    {
+      id: 2,
+      date: yesterday.toISOString(),
+      bedtime: new Date(new Date(today).setDate(today.getDate() - 2)).setHours(23, 15, 0),
+      wake_time: new Date(new Date(yesterday).setHours(7, 0, 0)).toISOString(),
+      total_sleep_duration_minutes: 465, // 7h 45m
+      sleep_performance_score: 75, 
+      sleep_consistency: 80
+    }
+  ];
+  return; 
+  // --- END FAKE DATA BLOCK ---
+
+  /* COMMENT OUT REAL API CALL TEMPORARILY
   const endDate = new Date();
   const startDate = new Date();
   
@@ -160,9 +182,9 @@ const loadData = async () => {
   } catch (err) {
     console.error(err);
   }
+  */
 };
 
-// React to timeframe changes
 watch(selectedTimeframe, loadData);
 
 onMounted(() => {
