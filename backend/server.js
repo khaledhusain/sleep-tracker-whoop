@@ -45,7 +45,7 @@ require('./app/routes/test.server.routes')(app);
 require('./app/routes/whoop.server.routes')(app);
 require('./app/routes/user.server.routes.js')(app);
 require(`./app/routes/sleep.server.routes.js`)(app);
-require('./swagger')(app);  
+require('./docs/swagger')(app);  
 
 // Default response for any other request
 app.use((req, res) => {
