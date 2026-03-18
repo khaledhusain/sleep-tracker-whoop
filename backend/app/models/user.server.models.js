@@ -85,6 +85,16 @@ const getUser = (user_id, done) => {
     })
 }
 
+const getInfo = (user_id, done) => {
+    const query = "SELECT first_name, last_name, email FROM users WHERE user_id=?";
+    db.get(query, user_id, (err, row) => {
+        if (err) return done(err);
+        if (!row) return done(404);
+
+        return done(false, { "user_id": row.user_id, "first_name": row.first_name, "last_name": row.last_name, "email": row.email });
+    })
+}
+
 module.exports = {
     addNewUser: addNewUser,
     authenticateUser: authenticateUser,
@@ -92,4 +102,5 @@ module.exports = {
     setToken: setToken,
     getIdFromToken: getIdFromToken,
     removeToken: removeToken,
+    getInfo: getInfo
 }
