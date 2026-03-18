@@ -39,6 +39,10 @@
   - Run `npm run test` in root project directory
 - Tests will output to the console with details
 
+### Running Swagger Doc
+- Run the backend (commands above for running backend)
+- Visit `http://localhost:3333/api-docs`
+
 ## Team Members
 - Ellis Ollier
 - Khaled Husain
