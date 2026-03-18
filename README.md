@@ -45,5 +45,4 @@
 - Joshua Roberts
 - Favour Omoregie
 - Abbie Roberts
-- Tomasz Walesiuk
 - Ace Blakeburn
