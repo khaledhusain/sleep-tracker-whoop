@@ -8,4 +8,6 @@ module.exports = function(app){
         .post(users.login);
     app.route("/user/logout")
         .post(authMiddleware.authenticate, users.logout);
+    app.route("/user/info")
+        .get(users.get_info)
 }
