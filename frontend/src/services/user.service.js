@@ -61,9 +61,8 @@ const login = (email, password) => {
             }
         })
         .then((resJson) => {
-            //localStorage.setItem("user_id", resJson.user_id);
+            localStorage.setItem("userId", resJson.user_id);
             localStorage.setItem("sessionToken", resJson.session_token);
-            //localStorage.setItem("email", email);
             return resJson;
         })
         .catch((err) => {
@@ -72,7 +71,36 @@ const login = (email, password) => {
         })
 }
 
+const logout = () => {
+    return fetch(`http://localhost:3333/user/logout`,
+        {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Authorization": localStorage.getItem("sessionToken")
+            }
+        })
+        .then(async (response) => {
+            if (response.status === 200) {
+                localStorage.removeItem("userId");
+                localStorage.removeItem("sessionToken");
+                return;
+            } else if (response.status === 401) {
+                throw "You are not logged in"
+            } else {
+                throw "Something went wrong"
+            }
+        })
+        .catch((err) => {
+            localStorage.removeItem("userId");
+            localStorage.removeItem("sessionToken");
+            console.log("Err", err);
+            return Promise.reject(err);
+        })
+}
+
 export const userService = {
     signUp,
     login,
+    logout
 }

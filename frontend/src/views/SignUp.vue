@@ -94,7 +94,7 @@ export default {
                 return;
             }
 
-            const passPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/
+            const passPattern = /^(?=.[0-9])(?=.[a-z])(?=.[A-Z])(?=.[!@.#&+])[a-zA-Z0-9!@.#&+]{8,16}$/
             if (!(passPattern.test(password))) {
                 this.error = "Password is not strong enough";
                 return;
