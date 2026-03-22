@@ -25,7 +25,7 @@ const create_account = (req, res) => {
     const { error } = schema.validate(req.body);
     if (error) {
         return res.status(400).send({
-            "error_message": error,
+            "error_message": error.details[0].message,
         })
     }
 
@@ -62,12 +62,12 @@ const login = (req, res) => {
     const { error } = schema.validate(req.body);
     if (error) {
         return res.status(400).send({
-            "error_message": error,
+            "error_message": error.details[0].message,
         })
     }
 
     users.authenticateUser(req.body.email, req.body.password, (err, id) => {
-        if (err === 404) return res.status(404).send({"error_message": "Invalid email/password!"});
+        if (err === 404) return res.status(404).send({ "error_message": "Invalid email/password!" });
         if (err) return res.status(500).send({ "error": err });
 
         users.getToken(id, (err, token) => {
@@ -106,8 +106,31 @@ const logout = (req, res) => {
     })
 }
 
+const get_info = (req, res) => {
+    let token = req.get("X-Authorization");
+    users.getIdFromToken(token, (err, user_id) => {
+        if (err) return res.status(404).send({
+            "error_message": err,
+        })
+
+        if (!token) {
+            return res.status(401).send({
+                "error_message": "Missing session token!"
+            })
+        }
+        users.getInfo(user_id, (err, row) => {
+            if (err || !row) return res.status(404).send({
+                "error_message": err,
+            })
+
+            return res.status(200).send({"user_id": user_id, "first_name": row.first_name, "last_name": row.last_name, email: row.email })
+        })
+    })
+}
+
 module.exports = {
     create_account: create_account,
     login: login,
-    logout: logout
+    logout: logout,
+    get_info: get_info
 }
