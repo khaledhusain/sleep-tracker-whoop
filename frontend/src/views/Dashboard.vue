@@ -79,7 +79,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { fetchSleepData } from '../services/sleep.service';
+import { fetchWhoopSleepHistory } from '../services/sleep.service';
 
 const sleepData = ref([]);
 const selectedTimeframe = ref('week');
@@ -148,50 +148,33 @@ const getScoreColor = (score) => {
 
 const loadData = async () => {
   const token = localStorage.getItem('sessionToken');
-
-  // --- START FAKE DATA BLOCK ---
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  sleepData.value = [
-    {
-      id: 1,
-      date: today.toISOString(),
-      bedtime: new Date(new Date(yesterday).setHours(22, 30, 0)).toISOString(),
-      wake_time: new Date(new Date(today).setHours(6, 45, 0)).toISOString(),
-      total_sleep_duration_minutes: 495, // 8h 15m
-      sleep_performance_score: 92,
-      sleep_consistency: 88
-    },
-    {
-      id: 2,
-      date: yesterday.toISOString(),
-      bedtime: new Date(new Date(today).setDate(today.getDate() - 2)).setHours(23, 15, 0),
-      wake_time: new Date(new Date(yesterday).setHours(7, 0, 0)).toISOString(),
-      total_sleep_duration_minutes: 465, // 7h 45m
-      sleep_performance_score: 75,
-      sleep_consistency: 80
-    }
-  ];
-  return;
-  // --- END FAKE DATA BLOCK ---
-
-  /* COMMENT OUT REAL API CALL TEMPORARILY
-  const endDate = new Date();
-  const startDate = new Date();
   
-  if (selectedTimeframe.value === 'week') startDate.setDate(startDate.getDate() - 7);
-  else if (selectedTimeframe.value === 'month') startDate.setMonth(startDate.getMonth() - 1);
-  else if (selectedTimeframe.value === 'year') startDate.setFullYear(startDate.getFullYear() - 1);
+  // Calculate the cutoff date based on the selected timeframe
+  const now = new Date();
+  const cutoffDate = new Date();
+  
+  if (selectedTimeframe.value === 'week') {
+    cutoffDate.setDate(now.getDate() - 7);
+  } else if (selectedTimeframe.value === 'month') {
+    cutoffDate.setMonth(now.getMonth() - 1);
+  } else if (selectedTimeframe.value === 'year') {
+    cutoffDate.setFullYear(now.getFullYear() - 1);
+  }
 
   try {
-    const data = await fetchSleepData(token, startDate, endDate);
-    sleepData.value = data;
+    // Fetch all WHOOP history from the backend
+    const allData = await fetchWhoopSleepHistory(token);
+    
+    // Filter the data based on our cutoff date
+    sleepData.value = allData.filter(session => {
+      const sessionDate = new Date(session.date);
+      return sessionDate >= cutoffDate;
+    });
+    
   } catch (err) {
-    console.error(err);
+    console.error("Failed to load WHOOP data:", err);
+    sleepData.value = []; // Reset on error
   }
-  */
 };
 
 watch(selectedTimeframe, loadData);

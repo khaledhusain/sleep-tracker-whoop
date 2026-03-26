@@ -18,3 +18,20 @@ export const fetchSleepData = async (token, startDate, endDate) => {
   }
   return await response.json();
 };
+
+export const fetchWhoopSleepHistory = async (token) => {
+  const url = new URL(`${API_URL}/whoop/sleep-history`);
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Authorization': token
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch WHOOP sleep history');
+  }
+  return await response.json();
+};
