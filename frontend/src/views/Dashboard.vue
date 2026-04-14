@@ -5,13 +5,25 @@
 
     <div class="z-10 w-full max-w-4xl mx-auto flex flex-col gap-8">
       
-      <header class="flex justify-between items-center mt-6">
+      <header class="flex justify-between items-center mt-6 flex-wrap gap-4">
         <h1 class="text-3xl font-extrabold tracking-tight text-purple">Overview</h1>
-        <select v-model="selectedTimeframe" class="bg-blue-2/80 border border-blue-4/30 text-white text-sm rounded-lg p-2.5 outline-none focus:border-purple transition-colors cursor-pointer shadow-sm">
-          <option value="week">Past Week</option>
-          <option value="month">Past Month</option>
-          <option value="year">Past Year</option>
-        </select>
+        
+        <div class="flex items-center gap-4">
+          <button 
+            @click="handleSyncData" 
+            :disabled="isSyncing || isLoading"
+            class="bg-purple hover:bg-purple/80 disabled:opacity-50 text-white text-sm font-semibold py-2.5 px-4 rounded-lg transition-colors flex items-center gap-2 shadow-sm"
+          >
+            <span v-if="isSyncing" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            {{ isSyncing ? 'Syncing...' : 'Sync Whoop' }}
+          </button>
+
+          <select v-model="selectedTimeframe" class="bg-blue-2/80 border border-blue-4/30 text-white text-sm rounded-lg p-2.5 outline-none focus:border-purple transition-colors cursor-pointer shadow-sm">
+            <option value="week">Past Week</option>
+            <option value="month">Past Month</option>
+            <option value="year">Past Year</option>
+          </select>
+        </div>
       </header>
 
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
@@ -54,7 +66,7 @@
               </div>
             </div>
 
-            <div class="flex justify-between text-sm text-grey-2 bg-blue-3/30 p-3 rounded-lg">
+            <div class="flex justify-between text-sm text-grey-2 bg-blue-3/30 p-3 rounded-lg flex-wrap gap-2">
               <span class="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
                 <strong>Bedtime:</strong> {{ formatTime(lastNight.bedtime) }}
@@ -67,7 +79,7 @@
           </div>
           
           <div v-else class="text-grey-1 text-sm text-center py-10 bg-blue-2/30 rounded-2xl border border-blue-4/20">
-            No sleep data recorded for last night. Make sure your device is synced.
+            No sleep data recorded for last night. Click "Sync Whoop" to fetch your latest data.
           </div>
         </section>
 
@@ -105,11 +117,12 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { fetchWhoopSleepHistory } from '../services/sleep.service';
+import { fetchWhoopSleepHistory, syncWhoopData } from '../services/sleep.service';
 
 const sleepData = ref([]);
 const selectedTimeframe = ref('week');
 const isLoading = ref(true);
+const isSyncing = ref(false);
 
 const timeframeLabel = computed(() => {
   const map = { week: 'Past 7 Days', month: 'Past 30 Days', year: 'Past Year' };
@@ -147,7 +160,6 @@ const stats = computed(() => {
   };
 });
 
-// Formatting Utilities
 const formatDuration = (minutes) => {
   if (!minutes) return '0h 0m';
   const h = Math.floor(minutes / 60);
@@ -163,12 +175,11 @@ const formatTime = (dateString) => {
 
 const getScoreColor = (score) => {
   if (!score) return 'text-grey-2';
-  if (score >= 85) return 'text-[#4ade80]'; // A subtle green, contrasting nicely with dark blue
+  if (score >= 85) return 'text-[#4ade80]'; 
   if (score >= 70) return 'text-yellow';
-  return 'text-[#f87171]'; // A soft red
+  return 'text-[#f87171]'; 
 };
 
-// Sleep Stage Calculation Logic
 const hasSleepStages = (session) => {
   return session.light_sleep_minutes || session.deep_sleep_minutes || session.rem_sleep_minutes;
 };
@@ -180,7 +191,6 @@ const getStagePercentage = (stageMinutes, session) => {
   return (stageMinutes / total) * 100;
 };
 
-// Data Loading
 const loadData = async () => {
   isLoading.value = true;
   const token = localStorage.getItem('sessionToken');
@@ -207,6 +217,24 @@ const loadData = async () => {
     sleepData.value = []; 
   } finally {
     isLoading.value = false;
+  }
+};
+
+const handleSyncData = async () => {
+  isSyncing.value = true;
+  const token = localStorage.getItem('sessionToken');
+  
+  try {
+    const syncResult = await syncWhoopData(token);
+    console.log(`Synced ${syncResult.inserted} entries!`);
+    
+    await loadData();
+    
+  } catch (err) {
+    console.error("Error syncing data:", err);
+    alert("Failed to sync WHOOP data. Please check your connection or re-authenticate.");
+  } finally {
+    isSyncing.value = false;
   }
 };
 
