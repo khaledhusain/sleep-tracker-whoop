@@ -16,7 +16,7 @@
         </div>
 
         <p
-          class="font-extrabold text-xl tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white to-purple group-hover:from-purple group-hover:to-white transition-all duration-500">
+          class="font-extrabold text-xl tracking-wide text-transparent bg-clip-text bg-linear-to-r from-white to-purple group-hover:from-purple group-hover:to-white transition-all duration-500">
           Sleep Tracker
         </p>
 
@@ -39,13 +39,12 @@
 
     <!-- messages -->
     <div class="flex justify-center">
-      <div v-if="showMsgs" class=" p-2 px-4 m-8 
-        bg-blue-3 text-white rounded transition-opacity duration-500 ease-out">
+      <div v-if="showMsgs" class="absolute p-3 px-4 m-8 bg-purple text-blue-3 rounded font-bold transition-opacity duration-500 ease-out">
         {{ messages }}
       </div>
     </div>
 
-    <router-view class="bg-blue-3 rounded-2xl p-6 shadow-lg border border-blue-4/10 flex-grow" />
+    <router-view class="" />
 
   </div>
 </template>
@@ -56,7 +55,7 @@ export default {
   data() {
     return {
       messages: "",
-      showMsgs: true,
+      showMsgs: false,
     };
   },
   methods: {
