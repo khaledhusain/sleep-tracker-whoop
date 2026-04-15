@@ -35,3 +35,21 @@ export const fetchWhoopSleepHistory = async (token) => {
   }
   return await response.json();
 };
+
+export const syncWhoopData = async (token, range = 'last-week') => {
+  const url = new URL(`${API_URL}/whoop/sleep`);
+  url.searchParams.append('range', range); 
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Authorization': token
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to sync WHOOP sleep data');
+  }
+  return await response.json(); 
+};
