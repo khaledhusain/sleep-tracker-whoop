@@ -94,7 +94,7 @@ export default {
                 return;
             }
 
-            const passPattern = /^(?=.[0-9])(?=.[a-z])(?=.[A-Z])(?=.[!@.#&+])[a-zA-Z0-9!@.#&+]{8,16}$/
+            const passPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/
             if (!(passPattern.test(password))) {
                 this.error = "Password is not strong enough";
                 return;
@@ -102,8 +102,8 @@ export default {
 
             userService.signUp(firstName, lastName, email, password)
                 .then(() => {
-                    //localStorage.setItem("successMsg", "Account created successfully");
-                    //this.$router.push("/login");
+                    localStorage.setItem("msgs", "Account created successfully");
+                    this.$router.push("/login");
                     this.error = "";
                 })
                 .catch(error => {

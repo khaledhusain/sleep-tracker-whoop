@@ -248,4 +248,5 @@ export default {
     }
   }
 }
-</script> what do i do now
+</script> 
+<!-- what do i do now -->

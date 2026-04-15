@@ -99,8 +99,40 @@ const logout = () => {
         })
 }
 
+const getInfo = () => {
+    return fetch(`http://localhost:3333/user/info`,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Authorization": localStorage.getItem("sessionToken")
+            }
+        })
+    .then(async (response) => {
+        if(response.status === 200){
+            return response.json();
+        }else if(response.status === 404){
+            const err = await response.json();
+                throw err.error_message;
+        }else if(response.status === 401){
+            const err = await response.json();
+                throw err.error_message;
+        }else{
+            const err = await response.json();
+                throw err.error_message;
+        }
+    })
+    .then((resJson) => {
+        return resJson;
+    })
+    .catch((err) => {
+        console.log("err", err);
+        return Promise.reject(err);
+    })
+}
+
 export const userService = {
     signUp,
     login,
-    logout
+    logout,
+    getInfo
 }

@@ -1,16 +1,18 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import IndividualSleepSessionPage from '@/views/IndividualSleepSessionPage.vue'
-import StatisticsPage from '@/views/StatisticsPage.vue'
+// import { createRouter, createWebHistory } from 'vue-router'
+// import IndividualSleepSessionPage from '@/views/IndividualSleepSessionPage.vue'
+// import StatisticsPage from '@/views/StatisticsPage.vue'
 
-const routes = [
-  { path: '/', redirect: '/session' },
-  { path: '/session', component: IndividualSleepSessionPage },
-  { path: '/statistics', component: StatisticsPage }
-]
+// const routes = [
+//   { path: '/', redirect: '/session' },
+//   { path: '/session', component: IndividualSleepSessionPage },
+//   { path: '/statistics', component: StatisticsPage }
+// ]
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes
-})
+// const router = createRouter({
+//   history: createWebHistory(),
+//   routes
+// })
 
-export default router
+// export default router
+
+//migrated to routes.js

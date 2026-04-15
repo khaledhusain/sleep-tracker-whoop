@@ -79,7 +79,7 @@ export default {
                 .then(() => {
                     this.submitted = false;
                     this.error = "";
-                    //localStorage.setItem("successMsg", "Login successful!");
+                    localStorage.setItem("msgs", "Login successful!");
                     this.$router.push("/");
                 })
                 .catch(error => {
