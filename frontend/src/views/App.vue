@@ -1,7 +1,7 @@
 <template>
   <div class="antialiased text-grey-2 bg-blue-2 p-5 font-Montserrat min-h-screen flex flex-col">
 
-    <div class="flex items-center justify-between pb-6 mb-2 border-b border-blue-4/20">
+    <div class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-2 border-b border-blue-4/20">
 
       <router-link to="/" class="flex items-center gap-3 group">
 
@@ -21,6 +21,23 @@
         </p>
 
       </router-link>
+
+      <nav v-if="isLoggedIn" class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <router-link
+          to="/dashboard"
+          active-class="bg-purple text-blue-1 shadow-[0_0_12px_rgba(153,163,251,0.35)]"
+          class="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-grey-2 transition-all hover:border-blue-4/30 hover:bg-blue-3/80 hover:text-white"
+        >
+          Dashboard
+        </router-link>
+        <router-link
+          to="/sleep-entries"
+          active-class="bg-purple text-blue-1 shadow-[0_0_12px_rgba(153,163,251,0.35)]"
+          class="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-grey-2 transition-all hover:border-blue-4/30 hover:bg-blue-3/80 hover:text-white"
+        >
+          Sleep data
+        </router-link>
+      </nav>
 
       <router-link to="/user" class="flex gap-3 relative group">
 
@@ -44,7 +61,7 @@
       </div>
     </div>
 
-    <router-view class="" />
+    <router-view class="flex-1 w-full min-h-0" />
 
   </div>
 </template>
@@ -56,9 +73,13 @@ export default {
     return {
       messages: "",
       showMsgs: false,
+      isLoggedIn: false,
     };
   },
   methods: {
+    syncAuthState() {
+      this.isLoggedIn = !!localStorage.getItem("sessionToken");
+    },
     checkMessages() {
       const msgs = localStorage.getItem("msgs");
       if (msgs) {
@@ -74,11 +95,13 @@ export default {
     }
   },
   mounted() {
+    this.syncAuthState();
     this.checkMessages();
   },
 
   watch: {
     $route() {
+      this.syncAuthState();
       this.checkMessages();
     }
   }
