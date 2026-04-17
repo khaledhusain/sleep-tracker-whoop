@@ -9,7 +9,10 @@ function isExpired(expiresAt) {
 }
 
 function whoopAuthMiddleware(req, res, next) {
-  whoopModel.getTokens((err, tokens) => {
+  if (req.user_id == null) {
+    return res.status(401).json({ error: "App login required" });
+  }
+  whoopModel.getTokens(req.user_id, (err, tokens) => {
     if (err) {
       req.accessToken = null;
       return next();
@@ -32,7 +35,7 @@ function whoopAuthMiddleware(req, res, next) {
           const newExpiresAt = expiresIn
             ? new Date(Date.now() + expiresIn * 1000).toISOString()
             : null;
-          whoopModel.setTokens(accessToken, refreshToken, newExpiresAt, (setErr) => {
+          whoopModel.setTokens(req.user_id, accessToken, refreshToken, newExpiresAt, (setErr) => {
             if (setErr) {
               req.accessToken = null;
               return next();

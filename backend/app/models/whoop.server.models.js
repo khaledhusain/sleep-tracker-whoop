@@ -1,30 +1,30 @@
 const db = require('../utils/database');
 
-const getTokens = (done) => {
+const getTokens = (userId, done) => {
     const sql = `
     SELECT access_token, refresh_token, expires_at
     FROM whoop_tokens
-    WHERE id = ?
+    WHERE user_id = ?
     `;
 
-    db.get(sql, [1], (err, row) => {
+    db.get(sql, [userId], (err, row) => {
         if (err) return done(err);
-        return done(null, row);
+        return done(null, row || null);
     });
 };
 
-const setTokens = (accessToken, refreshToken, expiresAt, done) => {
+const setTokens = (userId, accessToken, refreshToken, expiresAt, done) => {
     const sql = `
-    INSERT INTO whoop_tokens (id, access_token, refresh_token, expires_at, updated_at)
+    INSERT INTO whoop_tokens (user_id, access_token, refresh_token, expires_at, updated_at)
     VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(id) DO UPDATE SET
-      access_token = ?,
-      refresh_token = ?,
-      expires_at = ?,
+    ON CONFLICT(user_id) DO UPDATE SET
+      access_token = excluded.access_token,
+      refresh_token = excluded.refresh_token,
+      expires_at = excluded.expires_at,
       updated_at = CURRENT_TIMESTAMP
     `;
 
-    db.run(sql, [1, accessToken, refreshToken, expiresAt, accessToken, refreshToken, expiresAt], function(err) {
+    db.run(sql, [userId, accessToken, refreshToken, expiresAt], function (err) {
         if (err) return done(err);
         return done(null, this.changes);
     });
@@ -92,9 +92,10 @@ const insertSleepEntries = (entries, done) => {
   });
 };
 
-const getSleepEntries = (done) => {
-  const sql = `SELECT * FROM sleep_entries`;
-  db.all(sql, [], (err, rows) => {
+const getSleepEntries = (userId, done) => {
+  const sql = `SELECT * FROM sleep_entries WHERE user_id = ?
+    ORDER BY (wake_time IS NULL), wake_time DESC, id DESC`;
+  db.all(sql, [userId], (err, rows) => {
     if (err) return done(err);
     return done(null, rows || []);
   });

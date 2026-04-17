@@ -169,10 +169,23 @@ const delete_sleep = (req, res) => {
   });
 };
 
+const delete_all_sleeps = (req, res) => {
+  sleep.deleteAllSleepsForUser(req.user_id, (err, deleted) => {
+    if (err) {
+      return res.status(500).json({ error_message: err.message || "Internal server error" });
+    }
+    return res.status(200).json({
+      message: "All sleep entries removed for this account",
+      deleted,
+    });
+  });
+};
+
 module.exports = {
   get_all_sleeps,
   get_sleep,
   delete_sleep,
   create_sleep,
   update_sleep,
+  delete_all_sleeps,
 };

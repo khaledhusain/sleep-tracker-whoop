@@ -57,21 +57,57 @@ const initDatabase = () => {
     db.run(
       `
       CREATE TABLE IF NOT EXISTS whoop_tokens (
-        id INTEGER PRIMARY KEY CHECK (id = 1),
+        user_id INTEGER PRIMARY KEY,
         access_token TEXT NOT NULL,
         refresh_token TEXT NOT NULL,
         expires_at DATETIME,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
       );
       `,
       (err) => {
         if (err) console.error("whoop_tokens table creation:", err);
+        migrateLegacyWhoopTokensIfNeeded();
       }
     );
 
         console.log('Database tables initialized');
     });
 };
+
+/** Older DBs used a single global row (id = 1). Re-home those tokens onto user_id = 1 (or first user). */
+function migrateLegacyWhoopTokensIfNeeded() {
+  db.all("PRAGMA table_info(whoop_tokens)", (pragmaErr, cols) => {
+    if (pragmaErr || !cols || cols.length === 0) return;
+       const hasLegacyId = cols.some((c) => c.name === "id");
+    if (!hasLegacyId) return;
+
+    db.get("SELECT MIN(user_id) AS uid FROM users", (uErr, uRow) => {
+      const uid = uRow && uRow.uid != null ? uRow.uid : 1;
+      db.serialize(() => {
+        db.run("PRAGMA foreign_keys = OFF");
+        db.run(
+          `CREATE TABLE whoop_tokens__mig (
+            user_id INTEGER PRIMARY KEY,
+            access_token TEXT NOT NULL,
+            refresh_token TEXT NOT NULL,
+            expires_at DATETIME,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+          )`
+        );
+        db.run(
+          `INSERT INTO whoop_tokens__mig (user_id, access_token, refresh_token, expires_at, updated_at)
+ SELECT ?, access_token, refresh_token, expires_at, updated_at FROM whoop_tokens WHERE id = 1`,
+          [uid]
+        );
+        db.run("DROP TABLE whoop_tokens");
+        db.run("ALTER TABLE whoop_tokens__mig RENAME TO whoop_tokens");
+        db.run("PRAGMA foreign_keys = ON");
+      });
+    });
+  });
+}
 
 initDatabase();
 

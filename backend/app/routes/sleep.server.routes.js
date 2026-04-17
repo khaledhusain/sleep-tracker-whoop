@@ -2,6 +2,8 @@ const sleep = require("../controllers/sleep.server.controllers");
 const authMiddleware = require("../middleware/authMiddleware");
 
 module.exports = function(app){
+    app.route("/sleep/reset")
+        .delete(authMiddleware.authenticate, sleep.delete_all_sleeps);
     app.route("/sleep")
         .get(authMiddleware.authenticate, sleep.get_all_sleeps)
         .post(authMiddleware.authenticate, sleep.create_sleep)
