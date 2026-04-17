@@ -5,6 +5,7 @@ import Login from '@/views/Login.vue';
 import SignUp from '@/views/SignUp.vue';
 import Dashboard from '@/views/Dashboard.vue';
 import SleepEntriesPage from '@/views/SleepEntriesPage.vue';
+import HeatmapPage from '@/views/HeatmapPage.vue';
 import User from '@/views/User.vue';
 // import IndividualSleepSessionPage from '@/views/IndividualSleepSessionPage.vue';
 // import StatisticsPage from '@/views/StatisticsPage.vue';
@@ -16,6 +17,7 @@ const routes = [
     { path: "/signup", component: SignUp },
     { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true }},
     { path: "/sleep-entries", component: SleepEntriesPage, meta: { requiresAuth: true }},
+    { path: "/heatmap", component: HeatmapPage, meta: { requiresAuth: true }},
     { path: "/user", component: User, meta: { requiresAuth: true }},
     // { path: "/session", component: IndividualSleepSessionPage},
     // { path: "/statistics", component: StatisticsPage }

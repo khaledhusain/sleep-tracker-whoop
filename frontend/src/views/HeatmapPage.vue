@@ -1,0 +1,547 @@
+<template>
+  <div class="min-h-0 pb-0 text-white font-Montserrat">
+    <div class="mx-auto flex max-w-7xl flex-col gap-3 sm:gap-4">
+      <header class="shrink-0">
+        <h1 class="text-2xl font-extrabold tracking-tight text-purple sm:text-3xl">Heatmap</h1>
+        <p class="mt-0.5 text-xs text-grey-1 sm:text-sm">
+          See your sleep patterns month by month
+        </p>
+      </header>
+
+      <div class="shrink-0">
+        <div class="flex items-center justify-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            class="rounded-lg border border-blue-4/40 bg-blue-3/50 p-1.5 text-purple transition hover:border-purple/50 hover:bg-blue-4/30 hover:text-white disabled:opacity-40 sm:p-2"
+            :disabled="loading"
+            aria-label="Previous month"
+            @click="shiftMonth(-1)"
+          >
+            <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <span class="min-w-[9rem] text-center text-sm font-semibold tabular-nums text-white sm:min-w-[11rem] sm:text-base">
+            {{ monthTitle }}
+          </span>
+          <button
+            type="button"
+            class="rounded-lg border border-blue-4/40 bg-blue-3/50 p-1.5 text-purple transition hover:border-purple/50 hover:bg-blue-4/30 hover:text-white disabled:opacity-40 sm:p-2"
+            :disabled="loading"
+            aria-label="Next month"
+            @click="shiftMonth(1)"
+          >
+            <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+        <p v-if="monthSummary.label" class="mt-1 text-center text-[0.7rem] text-grey-1 sm:text-xs">
+          {{ monthSummary.label }}
+        </p>
+      </div>
+
+      <p
+        v-if="error"
+        class="mb-3 rounded-xl border border-[#f87171]/40 bg-[#f87171]/10 px-3 py-2 text-sm text-[#fca5a5]"
+      >
+        {{ error }}
+      </p>
+
+      <div
+        v-if="loading"
+        class="flex min-h-[240px] flex-col items-center justify-center text-grey-1"
+      >
+        <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-3 border-t-purple" />
+        <p class="mt-2 text-sm">Loading month…</p>
+      </div>
+
+      <div
+        v-else
+        class="grid min-h-0 grid-cols-1 items-start gap-6 max-[900px]:max-h-none min-[901px]:max-h-[calc(100vh-180px)] min-[901px]:grid-cols-[1.8fr_1.1fr]"
+      >
+        <div
+          class="min-w-0 rounded-2xl border border-blue-4/30 bg-[rgb(3_23_77/0.52)] p-4 shadow-[0_4px_30px_rgba(3,23,77,0.35)]"
+        >
+          <div class="grid grid-cols-7 gap-2.5">
+            <div
+              v-for="wd in weekDays"
+              :key="wd"
+              class="pb-0.5 text-center text-[0.6rem] font-semibold uppercase tracking-wider text-grey-1 sm:text-[0.65rem]"
+            >
+              {{ wd }}
+            </div>
+            <template v-for="(cell, idx) in gridCells" :key="idx">
+              <div
+                v-if="cell.type === 'pad'"
+                class="aspect-square min-h-0 rounded-[10px]"
+                aria-hidden="true"
+              />
+              <button
+                v-else
+                type="button"
+                class="group relative flex aspect-square min-h-0 w-full items-start justify-start overflow-hidden rounded-[10px] border p-1.5"
+                :class="cellButtonClass(cell)"
+                :title="cell.entry && cellHoverLabel(cell) ? cellHoverLabel(cell) : undefined"
+                @click="onDayClick(cell)"
+              >
+                <span
+                  class="relative z-10 text-[0.8125rem] font-extrabold leading-none tracking-[-0.02em] text-inherit [font-variant-numeric:tabular-nums] sm:text-sm"
+                  >{{ cell.day }}</span>
+                <span
+                  v-if="cell.entry && cellHoverLabel(cell)"
+                  class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-0.5"
+                >
+                  <span
+                    class="text-center text-[0.65rem] font-bold leading-none text-white opacity-0 [text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_0_10px_rgba(0,0,0,0.55)] [font-variant-numeric:tabular-nums] transition-opacity duration-300 ease-out group-hover:opacity-100"
+                    >{{ cellHoverLabel(cell) }}</span>
+                </span>
+              </button>
+            </template>
+          </div>
+
+          <div
+            class="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[0.6rem] text-grey-1 sm:text-[0.65rem]"
+          >
+            <span class="inline-flex items-center gap-1.5">
+              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#0e5629] ring-1 ring-white/30" /> 90-100
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#126f35] ring-1 ring-white/30" /> 80-89
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#16A34A] ring-1 ring-white/30" /> 70-79
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#FACC15] ring-1 ring-black/20" /> 60-69
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#CA8A04] ring-1 ring-black/20" /> 50-59
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#F97316] ring-1 ring-black/20" /> 40-49
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#DC2626] ring-1 ring-white/30" /> 30-39
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#991B1B] ring-1 ring-white/30" /> 0-29
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-blue-2/90 ring-1 ring-blue-4/40" /> No data
+            </span>
+          </div>
+
+          <p
+            v-if="!monthHasData"
+            class="mt-3 rounded-lg border border-blue-4/20 bg-blue-2/30 py-3 text-center text-xs text-grey-1"
+          >
+            No sleep data for this month
+          </p>
+        </div>
+
+        <aside
+          class="flex min-w-0 flex-col gap-0 overflow-y-auto rounded-2xl border border-blue-4/30 bg-[rgb(3_23_77/0.52)] p-[18px] shadow-[0_4px_30px_rgba(3,23,77,0.35)] max-[900px]:static max-[900px]:max-h-none max-[900px]:overflow-y-visible sm:p-5 min-[901px]:sticky min-[901px]:top-5 min-[901px]:max-h-[calc(100vh-180px)] min-[901px]:self-start"
+        >
+          <!-- 1. Header -->
+          <header
+            class="mb-4 flex flex-col items-start gap-2.5 border-b border-[rgb(109_117_176/0.3)] pb-3.5 min-[480px]:flex-row min-[480px]:items-baseline min-[480px]:justify-between min-[480px]:gap-3"
+          >
+            <h2
+              class="m-0 text-lg font-bold leading-snug tracking-[-0.01em] text-white sm:text-xl"
+            >
+              {{ selectedDayKey ? selectedDateHeading : 'Day details' }}
+            </h2>
+          </header>
+
+          <div v-if="!selectedDayKey" class="text-sm leading-[1.45] text-grey-1">
+            Choose a date in the calendar to see sleep metrics.
+          </div>
+
+          <template v-else-if="!selectedEntry">
+            <div class="text-sm leading-[1.45] text-grey-1">
+              No sleep logged for this day.
+            </div>
+          </template>
+
+          <template v-else>
+            <!-- 2. Primary metrics (boxed): Score, Duration, Time in bed -->
+            <div
+              v-if="hasAnyPrimaryMetric"
+              class="mb-0 grid grid-cols-[repeat(auto-fit,minmax(108px,1fr))] items-stretch gap-3 min-[600px]:grid-cols-3"
+            >
+              <div
+                v-if="primaryScoreShown"
+                class="flex min-w-0 flex-col justify-start rounded-xl border border-[rgb(109_117_176/0.28)] bg-[rgb(31_38_94/0.35)] px-3 py-3 pb-3.5 sm:px-3.5 sm:py-3.5 sm:pb-4"
+              >
+                <p
+                  class="m-0 truncate text-[0.62rem] font-semibold uppercase leading-tight tracking-[0.08em] text-[rgb(197_198_208/0.92)]"
+                >
+                  Sleep score
+                </p>
+                <p
+                  class="m-0 mt-2.5 text-2xl font-extrabold leading-[1.15] tracking-[-0.02em] text-[rgb(110_231_183)] [font-variant-numeric:tabular-nums] sm:text-[1.65rem]"
+                >
+                  {{ selectedEntry.sleep_performance_score }}
+                </p>
+              </div>
+              <div
+                v-if="primaryDurationShown"
+                class="flex min-w-0 flex-col justify-start rounded-xl border border-[rgb(109_117_176/0.28)] bg-[rgb(31_38_94/0.35)] px-3 py-3 pb-3.5 sm:px-3.5 sm:py-3.5 sm:pb-4"
+              >
+                <p
+                  class="m-0 truncate text-[0.62rem] font-semibold uppercase leading-tight tracking-[0.08em] text-[rgb(197_198_208/0.92)]"
+                >
+                  Sleep duration
+                </p>
+                <p
+                  class="m-0 mt-2.5 text-lg font-bold leading-[1.15] tracking-[-0.02em] text-white [font-variant-numeric:tabular-nums] sm:text-xl"
+                >
+                  {{ formatDurationHoursMinutes(selectedEntry.total_sleep_duration_minutes) }}
+                </p>
+              </div>
+              <div
+                v-if="primaryInBedShown"
+                class="flex min-w-0 flex-col justify-start rounded-xl border border-[rgb(109_117_176/0.28)] bg-[rgb(31_38_94/0.35)] px-3 py-3 pb-3.5 sm:px-3.5 sm:py-3.5 sm:pb-4"
+              >
+                <p
+                  class="m-0 truncate text-[0.62rem] font-semibold uppercase leading-tight tracking-[0.08em] text-[rgb(197_198_208/0.92)]"
+                >
+                  Time in bed
+                </p>
+                <p
+                  class="m-0 mt-2.5 text-lg font-bold leading-[1.15] tracking-[-0.02em] text-white [font-variant-numeric:tabular-nums] sm:text-xl"
+                >
+                  {{ formatDurationHoursMinutes(selectedEntry.total_in_bed_minutes) }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              v-if="bedWakeSub && primaryInBedShown"
+              class="mb-4 mt-3 flex flex-col gap-1.5 rounded-xl border border-[rgb(109_117_176/0.22)] bg-[rgb(31_38_94/0.28)] px-3.5 py-[11px]"
+            >
+              <span
+                class="text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-[rgb(197_198_208/0.8)]"
+                >Sleep Window</span>
+              <span
+                class="break-words text-[0.84rem] font-medium leading-[1.45] tracking-[0.02em] text-[rgb(245_245_245/0.96)] [font-variant-numeric:tabular-nums] sm:text-[0.88rem]"
+                >{{ bedWakeSub }}</span>
+            </div>
+
+            <!-- 3. Secondary: efficiency & consistency, inline -->
+            <div
+              v-if="hasSecondaryMetrics"
+              class="mb-[18px] grid grid-cols-2 gap-x-4 gap-y-2.5 pb-0.5"
+            >
+              <p
+                v-if="efficiencyShown"
+                class="m-0 text-[0.78rem] leading-[1.4] text-[rgb(211_212_222/0.95)]"
+              >
+                <span
+                  class="mb-0.5 block text-[0.65rem] font-semibold uppercase tracking-[0.06em] text-[rgb(197_198_208/0.75)]"
+                  >Sleep Efficiency</span>
+                <span
+                  class="font-semibold text-[rgb(245_245_245/0.95)] [font-variant-numeric:tabular-nums]"
+                  >{{ selectedEntry.sleep_efficiency }}%</span>
+              </p>
+              <p
+                v-if="consistencyShown"
+                class="m-0 text-[0.78rem] leading-[1.4] text-[rgb(211_212_222/0.95)]"
+              >
+                <span
+                  class="mb-0.5 block text-[0.65rem] font-semibold uppercase tracking-[0.06em] text-[rgb(197_198_208/0.75)]"
+                  >Sleep Consistency</span>
+                <span
+                  class="font-semibold text-[rgb(245_245_245/0.95)] [font-variant-numeric:tabular-nums]"
+                  >{{ selectedEntry.sleep_consistency }}%</span>
+              </p>
+            </div>
+
+            <!-- 4. Sleep stages -->
+            <section
+              v-if="stageSegments"
+              class="mt-0.5 border-t border-[rgb(109_117_176/0.22)] pt-4"
+            >
+              <h3
+                class="mb-3 mt-0 text-[0.68rem] font-semibold uppercase tracking-[0.07em] text-[rgb(197_198_208/0.9)]"
+              >
+                Sleep stages
+              </h3>
+              <div class="flex h-3.5 w-full overflow-hidden rounded-full bg-[rgb(109_117_176/0.18)]">
+                <div
+                  v-for="seg in stageSegments"
+                  :key="seg.key"
+                  class="h-full min-w-0"
+                  :style="{ width: `${seg.widthPct}%`, backgroundColor: seg.color }"
+                  :title="`${seg.label} ${formatDurationHoursMinutes(seg.minutes)} (${seg.pct}%)`"
+                />
+              </div>
+              <ul
+                class="m-0 mt-3.5 grid list-none grid-cols-2 gap-x-[18px] gap-y-3 p-0 max-[380px]:grid-cols-1"
+              >
+                <li
+                  v-for="seg in stageSegments"
+                  :key="seg.label"
+                  class="flex min-w-0 items-start gap-2"
+                >
+                  <span
+                    class="mt-[0.35em] h-[7px] w-[7px] shrink-0 rounded-full"
+                    :style="{ backgroundColor: seg.color }"
+                  />
+                  <p class="m-0 min-w-0 text-[0.78rem] leading-[1.45]">
+                    <span class="font-semibold text-white">{{ seg.label }}</span>
+                    <span class="font-normal text-[rgb(197_198_208/0.55)]"> - </span>
+                    <span
+                      class="text-[0.74rem] text-[rgb(197_198_208/0.92)] [font-variant-numeric:tabular-nums]"
+                    >
+                      {{ formatDurationHoursMinutes(seg.minutes) }} · {{ seg.pct }}%
+                    </span>
+                  </p>
+                </li>
+              </ul>
+            </section>
+            <p
+              v-else
+              class="mt-4 border-t border-[rgb(109_117_176/0.18)] pt-3.5 text-[0.72rem] leading-[1.4] text-[rgb(197_198_208/0.65)]"
+            >
+              Detailed stage data not available for this entry.
+            </p>
+          </template>
+        </aside>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue';
+import { fetchSleepData } from '@/services/sleep.service';
+import {
+  buildDayEntryMap,
+  buildMonthGridCells,
+  computeMonthSummary,
+  monthStartEndDateStrings,
+  toLocalDayKey,
+  getStageSegments,
+  formatDurationHoursMinutes,
+  formatTimeRangeLabel,
+  formatMinutesAsHm,
+} from '@/utils/sleepHeatmap';
+
+const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+const now = new Date();
+const viewYear = ref(now.getFullYear());
+const viewMonth = ref(now.getMonth());
+
+const loading = ref(true);
+const error = ref('');
+const rawEntries = ref([]);
+const dayMap = ref(new Map());
+const selectedDayKey = ref(null);
+
+const monthTitle = computed(() =>
+  new Date(viewYear.value, viewMonth.value, 1).toLocaleString(undefined, {
+    month: 'long',
+    year: 'numeric',
+  })
+);
+
+const gridCells = computed(() =>
+  buildMonthGridCells(viewYear.value, viewMonth.value, dayMap.value)
+);
+
+const monthSummary = computed(() =>
+  computeMonthSummary(dayMap.value, viewYear.value, viewMonth.value)
+);
+
+const monthHasData = computed(() => {
+  for (const c of gridCells.value) {
+    if (c.type === 'day' && c.entry) return true;
+  }
+  return false;
+});
+
+const selectedEntry = computed(() => {
+  if (!selectedDayKey.value) return null;
+  return dayMap.value.get(selectedDayKey.value) || null;
+});
+
+const selectedDateHeading = computed(() => {
+  if (!selectedDayKey.value) return '';
+  const [y, m, d] = selectedDayKey.value.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  return dt.toLocaleString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+});
+
+const bedWakeSub = computed(() => {
+  const e = selectedEntry.value;
+  if (!e) return '';
+  return formatTimeRangeLabel(e.bedtime, e.wake_time);
+});
+
+const stageSegments = computed(() => {
+  const e = selectedEntry.value;
+  if (!e) return null;
+  return getStageSegments(e);
+});
+
+const primaryScoreShown = computed(() => {
+  const e = selectedEntry.value;
+  if (!e) return false;
+  const sc = e.sleep_performance_score;
+  return sc != null && sc !== '' && !Number.isNaN(Number(sc));
+});
+
+const primaryDurationShown = computed(() => {
+  const e = selectedEntry.value;
+  if (!e) return false;
+  const d = Number(e.total_sleep_duration_minutes);
+  return !Number.isNaN(d) && d > 0;
+});
+
+const primaryInBedShown = computed(() => {
+  const e = selectedEntry.value;
+  if (!e) return false;
+  const d = Number(e.total_in_bed_minutes);
+  return !Number.isNaN(d) && d > 0;
+});
+
+const hasAnyPrimaryMetric = computed(
+  () =>
+    primaryScoreShown.value || primaryDurationShown.value || primaryInBedShown.value
+);
+
+const efficiencyShown = computed(() => {
+  const e = selectedEntry.value;
+  if (!e) return false;
+  const v = e.sleep_efficiency;
+  return v != null && v !== '' && !Number.isNaN(Number(v));
+});
+
+const consistencyShown = computed(() => {
+  const e = selectedEntry.value;
+  if (!e) return false;
+  const v = e.sleep_consistency;
+  return v != null && v !== '' && !Number.isNaN(Number(v));
+});
+
+const hasSecondaryMetrics = computed(
+  () => efficiencyShown.value || consistencyShown.value
+);
+
+function todayKey() {
+  return toLocalDayKey(new Date());
+}
+
+function isCellToday(cell) {
+  if (cell.type !== 'day') return false;
+  return cell.dayKey === todayKey();
+}
+
+function isCellSelected(cell) {
+  if (cell.type !== 'day') return false;
+  return cell.dayKey === selectedDayKey.value;
+}
+
+function cellHoverLabel(cell) {
+  if (cell.type !== 'day' || !cell.entry) return '';
+  const e = cell.entry;
+  const sc = e.sleep_performance_score;
+  if (sc != null && sc !== '' && !Number.isNaN(Number(sc))) {
+    return String(sc);
+  }
+  const fromSleep = formatMinutesAsHm(e.total_sleep_duration_minutes);
+  if (fromSleep) return fromSleep;
+  return formatMinutesAsHm(e.total_in_bed_minutes);
+}
+
+function cellButtonClass(cell) {
+  const base = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-purple/60';
+  if (cell.type !== 'day') return base;
+
+  const today = isCellToday(cell);
+  const sel = isCellSelected(cell);
+
+  const tier = cell.tier;
+  const dayShadowDark =
+    '[&>span:first-child]:[text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_0_1px_rgba(0,0,0,0.5)]';
+  const tierStyles = {
+    t1: `border-white/20 bg-[#0e5629] text-white hover:bg-[#14532d] ${dayShadowDark}`,
+    t2: `border-white/25 bg-[#126f35] text-white hover:bg-[#166534] ${dayShadowDark}`,
+    t3: `border-white/20 bg-[#16A34A] text-white hover:bg-[#15803d] ${dayShadowDark}`,
+    t4:
+      `border-black/15 bg-[#FACC15] text-white hover:bg-[#eab308] ${dayShadowDark}`,
+    t5:
+      `border-black/15 bg-[#CA8A04] text-white hover:bg-[#a16207] ${dayShadowDark}`,
+    t6:
+      `border-black/15 bg-[#F97316] text-white hover:bg-[#ea580c] ${dayShadowDark}`,
+    t7: `border-white/20 bg-[#DC2626] text-white hover:bg-[#b91c1c] ${dayShadowDark}`,
+    t8: `border-white/25 bg-[#991B1B] text-white hover:bg-[#7f1d1d] ${dayShadowDark}`,
+  };
+  const tierCls =
+    tierStyles[tier] ??
+    `border-blue-4/35 bg-blue-2/90 text-white hover:bg-blue-3/95 ${dayShadowDark}`;
+
+  let ring = '';
+  if (sel) {
+    ring =
+      'z-10 ring-2 ring-sky-400/90 ring-offset-2 ring-offset-[#03174D] shadow-[0_0_12px_rgba(56,189,248,0.35)]';
+  } else if (today) {
+    ring = 'ring-1 ring-white/35 ring-inset';
+  }
+
+  return [base, tierCls, ring, 'cursor-pointer'].filter(Boolean).join(' ');
+}
+
+function onDayClick(cell) {
+  if (cell.type !== 'day') return;
+  selectedDayKey.value = cell.dayKey;
+}
+
+function shiftMonth(delta) {
+  const d = new Date(viewYear.value, viewMonth.value + delta, 1);
+  viewYear.value = d.getFullYear();
+  viewMonth.value = d.getMonth();
+}
+
+function syncSelectionToMonth() {
+  const tk = todayKey();
+  const [ty, tm] = tk.split('-').map(Number);
+  if (ty === viewYear.value && tm - 1 === viewMonth.value) {
+    selectedDayKey.value = tk;
+    return;
+  }
+  selectedDayKey.value = null;
+}
+
+async function loadMonth() {
+  error.value = '';
+  loading.value = true;
+  const token = localStorage.getItem('sessionToken');
+  const { start, end } = monthStartEndDateStrings(viewYear.value, viewMonth.value);
+  try {
+    const rows = await fetchSleepData(token, start, end);
+    rawEntries.value = Array.isArray(rows) ? rows : [];
+    dayMap.value = buildDayEntryMap(rawEntries.value);
+  } catch (e) {
+    error.value = e.message || 'Could not load sleep data.';
+    rawEntries.value = [];
+    dayMap.value = new Map();
+  } finally {
+    loading.value = false;
+  }
+}
+
+watch([viewYear, viewMonth], async () => {
+  await loadMonth();
+  syncSelectionToMonth();
+});
+
+onMounted(async () => {
+  await loadMonth();
+  syncSelectionToMonth();
+});
+</script>
+

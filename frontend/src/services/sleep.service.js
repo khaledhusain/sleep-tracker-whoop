@@ -2,8 +2,14 @@ const API_URL = 'http://localhost:3333';
 
 export const fetchSleepData = async (token, startDate, endDate) => {
   const url = new URL(`${API_URL}/sleep`);
-  if (startDate) url.searchParams.append('start_date', startDate.toISOString());
-  if (endDate) url.searchParams.append('end_date', endDate.toISOString());
+  const toParam = (v) => {
+    if (v == null) return null;
+    if (typeof v === 'string') return v;
+    if (v instanceof Date) return v.toISOString();
+    return String(v);
+  };
+  if (startDate) url.searchParams.append('start_date', toParam(startDate));
+  if (endDate) url.searchParams.append('end_date', toParam(endDate));
 
   const response = await fetch(url, {
     method: 'GET',

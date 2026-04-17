@@ -44,6 +44,14 @@ const create_sleep = (req, res) => {
   });
 };
 
+/** Normalize query dates to `YYYY-MM-DD` so SQLite text compare matches stored `date`. */
+function toSqlDateOnly(v) {
+  if (v == null) return null;
+  const d = v instanceof Date ? v : new Date(v);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
 const get_all_sleeps = (req, res) => {
   const getAllSleepsSchema = Joi.object({
     start_date: Joi.date().iso().optional(),
@@ -55,7 +63,11 @@ const get_all_sleeps = (req, res) => {
     return res.status(400).json({ error_message: error.details[0].message });
   }
 
-  sleep.getAllSleeps(req.user_id, value || {}, (err, rows) => {
+  const filters = {};
+  if (value?.start_date) filters.start_date = toSqlDateOnly(value.start_date);
+  if (value?.end_date) filters.end_date = toSqlDateOnly(value.end_date);
+
+  sleep.getAllSleeps(req.user_id, filters, (err, rows) => {
     if (err) {
       return res.status(500).json({ error_message: err.message || "Internal server error" });
     }
