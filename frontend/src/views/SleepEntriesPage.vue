@@ -1,7 +1,8 @@
 <template>
-  <div class="min-h-full text-white font-Montserrat">
-    <div class="mx-auto max-w-[1600px] flex flex-col gap-6">
-      <header class="flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <div class="mx-auto max-w-[1600px] flex flex-col gap-8 ">
+      
+      <header class="flex justify-between items-center mt-6 flex-wrap gap-4">
         <div>
           <h1 class="text-3xl font-extrabold tracking-tight text-purple">Sleep entries</h1>
         </div>

@@ -1,7 +1,7 @@
 <template>
-  <div class="antialiased text-grey-2 bg-blue-2 p-5 font-Montserrat min-h-screen flex flex-col">
+  <div class="antialiased text-white bg-blue-2 p-5 font-Montserrat min-h-screen flex flex-col">
 
-    <div class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-2 border-b border-blue-4/20">
+    <div class="flex flex-wrap items-center justify-between gap-4 pb-6 pt-1.5 mb-2 border-b border-blue-4/20">
 
       <router-link to="/" class="flex items-center gap-3 group">
 
@@ -22,26 +22,17 @@
 
       </router-link>
 
-      <nav v-if="isLoggedIn" class="flex flex-wrap items-center gap-2 sm:gap-3">
-        <router-link
-          to="/dashboard"
-          active-class="bg-purple text-blue-1 shadow-[0_0_12px_rgba(153,163,251,0.35)]"
-          class="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-grey-2 transition-all hover:border-blue-4/30 hover:bg-blue-3/80 hover:text-white"
-        >
+      <nav v-if="isLoggedIn" class="flex items-center gap-2 sm:gap-3 sm:pr-37 ">
+        <router-link to="/dashboard" active-class="bg-purple text-blue-1 shadow-[0_0_12px_rgba(153,163,251,0.35)]"
+          class="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-grey-2 transition-all hover:border-blue-4/30 hover:bg-blue-3/80 hover:text-white">
           Dashboard
         </router-link>
-        <router-link
-          to="/sleep-entries"
-          active-class="bg-purple text-blue-1 shadow-[0_0_12px_rgba(153,163,251,0.35)]"
-          class="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-grey-2 transition-all hover:border-blue-4/30 hover:bg-blue-3/80 hover:text-white"
-        >
+        <router-link to="/sleep-entries" active-class="bg-purple text-blue-1 shadow-[0_0_12px_rgba(153,163,251,0.35)]"
+          class="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-grey-2 transition-all hover:border-blue-4/30 hover:bg-blue-3/80 hover:text-white">
           Sleep data
         </router-link>
-        <router-link
-          to="/heatmap"
-          active-class="bg-purple text-blue-1 shadow-[0_0_12px_rgba(153,163,251,0.35)]"
-          class="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-grey-2 transition-all hover:border-blue-4/30 hover:bg-blue-3/80 hover:text-white"
-        >
+        <router-link to="/heatmap" active-class="bg-purple text-blue-1 shadow-[0_0_12px_rgba(153,163,251,0.35)]"
+          class="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-grey-2 transition-all hover:border-blue-4/30 hover:bg-blue-3/80 hover:text-white">
           Heatmap
         </router-link>
       </nav>
@@ -49,8 +40,8 @@
       <router-link to="/user" class="flex gap-3 relative group">
 
         <div
-          class="bg-blue-3 p-2 rounded-full shadow-md border border-blue-4/30 text-grey-1 group-hover:bg-purple group-hover:text-blue-1 group-hover:border-purple transition-all duration-300 hover:scale-110 active:scale-95">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+          class="bg-blue-3 p-1.5 rounded-full shadow-md border border-blue-4/30 text-grey-1 group-hover:bg-purple group-hover:text-blue-1 group-hover:border-purple transition-all duration-300 hover:scale-110 active:scale-95">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7">
             <path fill-rule="evenodd"
               d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
               clip-rule="evenodd" />
@@ -63,12 +54,14 @@
 
     <!-- messages -->
     <div class="flex justify-center">
-      <div v-if="showMsgs" class="absolute p-3 px-4 m-8 bg-purple text-blue-3 rounded font-bold transition-opacity duration-500 ease-out">
+      <div v-if="showMsgs"
+        class="absolute z-20 p-3 px-4 m-8 bg-purple  rounded font-bold transition-opacity duration-500 ease-out">
         {{ messages }}
       </div>
     </div>
 
-    <router-view class="flex-1 w-full min-h-0" />
+    <router-view class="flex flex-col min-h-screen bg-blue-1 p-6 isolation-isolate rounded-2xl" />
+    <!-- Avoid mix-blend-screen on large fixed layers: it can hide the rest of the page on some GPUs/browsers (Windows). -->
 
   </div>
 </template>
@@ -87,6 +80,7 @@ export default {
     syncAuthState() {
       this.isLoggedIn = !!localStorage.getItem("sessionToken");
     },
+
     checkMessages() {
       const msgs = localStorage.getItem("msgs");
       if (msgs) {

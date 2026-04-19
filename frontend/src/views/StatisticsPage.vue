@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-blue-1 text-white relative overflow-hidden flex flex-col font-Montserrat p-6">
-    <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-purple rounded-full mix-blend-screen blur-[100px] opacity-20 fixed"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-64 h-64 bg-blue-4 rounded-full mix-blend-screen blur-[100px] opacity-20 fixed"></div>
+    <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-purple rounded-full mix-blend-screen blur-[100px] opacity-20"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-64 h-64 bg-blue-4 rounded-full mix-blend-screen blur-[100px] opacity-20"></div>
 
     <div class="z-10 w-full max-w-4xl mx-auto flex flex-col gap-6">
       <header class="flex justify-between items-center mt-6 mb-4">

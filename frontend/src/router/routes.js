@@ -12,29 +12,35 @@ import User from '@/views/User.vue';
 
 
 const routes = [
-    { path: "/", component: Home },
-    { path: "/login", component: Login },
-    { path: "/signup", component: SignUp },
-    { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true }},
-    { path: "/sleep-entries", component: SleepEntriesPage, meta: { requiresAuth: true }},
-    { path: "/heatmap", component: HeatmapPage, meta: { requiresAuth: true }},
-    { path: "/user", component: User, meta: { requiresAuth: true }},
-    // { path: "/session", component: IndividualSleepSessionPage},
-    // { path: "/statistics", component: StatisticsPage }
+  { path: "/", component: Home },
+  { path: "/login", component: Login },
+  { path: "/signup", component: SignUp },
+  { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true } },
+  { path: "/sleep-entries", component: SleepEntriesPage, meta: { requiresAuth: true } },
+  { path: "/heatmap", component: HeatmapPage, meta: { requiresAuth: true } },
+  { path: "/user", component: User, meta: { requiresAuth: true } },
+  // { path: "/session", component: IndividualSleepSessionPage},
+  // { path: "/statistics", component: StatisticsPage }
 ];
 
 const router = createRouter({
-    history: createWebHistory(),
-    routes,
+  history: createWebHistory(),
+  routes,
 });
 
 //check login - block movement
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("sessionToken");
+  const authRoutes = ["/signup", "/login"];
 
   if (to.meta.requiresAuth && !token) {
     localStorage.setItem("msgs", "Please login first");
     next("/login");
+  } else if (authRoutes.includes(to.path) && token) {
+    localStorage.setItem("msgs", "You are already logged in");
+    next("/dashboard");
+  } else if (["/"].includes(to.path) && token) {
+    next("/dashboard");
   } else {
     next();
   }

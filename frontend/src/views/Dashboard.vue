@@ -1,31 +1,26 @@
 <template>
-  <div class="min-h-screen bg-blue-1 text-white relative flex flex-col font-Montserrat p-6 isolation-isolate">
-    <!-- Avoid mix-blend-screen on large fixed layers: it can hide the rest of the page on some GPUs/browsers (Windows). -->
-    <div
-      class="pointer-events-none fixed top-[-10%] left-[-10%] z-0 h-64 w-64 rounded-full bg-purple/25 blur-[100px]"
-      aria-hidden="true"
-    ></div>
+  <div class="relative overflow-hidden">
+    <div class="pointer-events-none fixed top-[-10%] left-[-10%] z-0 h-64 w-64 rounded-full bg-purple/25 blur-[100px]"
+      aria-hidden="true"></div>
     <div
       class="pointer-events-none fixed bottom-[-10%] right-[-10%] z-0 h-64 w-64 rounded-full bg-blue-4/25 blur-[100px]"
-      aria-hidden="true"
-    ></div>
+      aria-hidden="true"></div>
 
     <div class="relative z-10 flex w-full max-w-4xl flex-col gap-8 mx-auto min-h-[12rem]">
-      
+
       <header class="flex justify-between items-center mt-6 flex-wrap gap-4">
         <h1 class="text-3xl font-extrabold tracking-tight text-purple">Overview</h1>
-        
+
         <div class="flex items-center gap-4">
-          <button 
-            @click="handleSyncData" 
-            :disabled="isSyncing || isLoading || whoopStatusLoading || !whoopConnected"
-            class="bg-purple hover:bg-purple/80 disabled:opacity-50 text-white text-sm font-semibold py-2.5 px-4 rounded-lg transition-colors flex items-center gap-2 shadow-sm"
-          >
-            <span v-if="isSyncing" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <button @click="handleSyncData" :disabled="isSyncing || isLoading || whoopStatusLoading || !whoopConnected"
+            class="bg-purple hover:bg-purple/80 disabled:opacity-50 text-white text-sm font-semibold py-2.5 px-4 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+            <span v-if="isSyncing"
+              class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
             {{ isSyncing ? 'Syncing...' : 'Sync WHOOP' }}
           </button>
 
-          <select v-model="selectedTimeframe" class="bg-blue-2/80 border border-blue-4/30 text-white text-sm rounded-lg p-2.5 outline-none focus:border-purple transition-colors cursor-pointer shadow-sm">
+          <select v-model="selectedTimeframe"
+            class="bg-blue-2/80 border border-blue-4/30 text-white text-sm rounded-lg p-2.5 outline-none focus:border-purple transition-colors cursor-pointer shadow-sm">
             <option value="night">Last night</option>
             <option value="week">Last week</option>
             <option value="month">Last month</option>
@@ -37,19 +32,14 @@
         {{ connectBanner }}
       </p>
 
-      <section
-        v-if="!whoopStatusLoading && !whoopConnected"
-        class="rounded-2xl border border-blue-4/30 bg-blue-2/40 p-6 shadow-[0_4px_30px_rgba(3,23,77,0.35)]"
-      >
+      <section v-if="!whoopStatusLoading && !whoopConnected"
+        class="rounded-2xl border border-blue-4/30 bg-blue-2/40 p-6 shadow-[0_4px_30px_rgba(3,23,77,0.35)]">
         <h2 class="text-lg font-bold text-white mb-2">Connect WHOOP</h2>
         <p class="text-grey-1 text-sm leading-relaxed mb-4 max-w-2xl">
           Link your WHOOP account.
         </p>
-        <button
-          type="button"
-          @click="startWhoopConnect"
-          class="bg-purple hover:bg-purple/90 text-white text-sm font-semibold py-2.5 px-5 rounded-lg transition-colors shadow-sm"
-        >
+        <button type="button" @click="startWhoopConnect"
+          class="bg-purple hover:bg-purple/90 text-white text-sm font-semibold py-2.5 px-5 rounded-lg transition-colors shadow-sm">
           Connect WHOOP
         </button>
       </section>
@@ -69,23 +59,23 @@
               Loaded {{ lastFetchedAt }}
             </p>
           </div>
-          
-          <div v-if="lastNight" class="bg-blue-2/40 backdrop-blur-sm p-6 rounded-2xl border border-blue-4/20 shadow-[0_4px_30px_rgba(3,23,77,0.5)] transition-all hover:bg-blue-2/50">
+
+          <div v-if="lastNight"
+            class="bg-blue-2/40 backdrop-blur-sm p-6 rounded-2xl border border-blue-4/20 shadow-[0_4px_30px_rgba(3,23,77,0.5)] transition-all hover:bg-blue-2/50">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-blue-4/20 pb-3">
               <p class="text-sm text-grey-2">
                 <span class="text-grey-1">Night</span> · {{ formatLongDate(lastNight.date) || '—' }}
               </p>
-              <span
-                v-if="isNap(lastNight)"
-                class="rounded-full border border-yellow/40 bg-yellow/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-yellow"
-              >
+              <span v-if="isNap(lastNight)"
+                class="rounded-full border border-yellow/40 bg-yellow/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-yellow">
                 Nap
               </span>
             </div>
             <div class="flex flex-wrap justify-between items-center border-b border-blue-4/20 pb-5 mb-5 gap-4">
               <div>
                 <p class="text-grey-1 text-xs uppercase tracking-wider mb-1 font-semibold">Sleep duration</p>
-                <p class="text-3xl font-bold text-white">{{ formatDuration(lastNight.total_sleep_duration_minutes) }}</p>
+                <p class="text-3xl font-bold text-white">{{ formatDuration(lastNight.total_sleep_duration_minutes) }}
+                </p>
                 <p class="text-grey-1 mt-1 text-[10px] leading-snug">
                   WHOOP asleep time (light + deep + REM)—usually a bit shorter than bedtime → wake.
                 </p>
@@ -101,32 +91,50 @@
             <div v-if="hasSleepStages(lastNight)" class="mb-5">
               <div class="flex justify-between text-xs text-grey-1 mb-2">
                 <span>Sleep stages (light + deep + REM)</span>
-                <span>{{ formatDuration((lastNight.light_sleep_minutes || 0) + (lastNight.deep_sleep_minutes || 0) + (lastNight.rem_sleep_minutes || 0)) }}</span>
+                <span>{{ formatDuration((lastNight.light_sleep_minutes || 0) + (lastNight.deep_sleep_minutes || 0) +
+                  (lastNight.rem_sleep_minutes || 0)) }}</span>
               </div>
               <div class="h-3 w-full bg-blue-3 rounded-full flex overflow-hidden">
-                <div class="bg-blue-4 transition-all duration-500" :style="{ width: getStagePercentage(lastNight.light_sleep_minutes, lastNight) + '%' }" title="Light Sleep"></div>
-                <div class="bg-purple transition-all duration-500" :style="{ width: getStagePercentage(lastNight.rem_sleep_minutes, lastNight) + '%' }" title="REM Sleep"></div>
-                <div class="bg-yellow transition-all duration-500" :style="{ width: getStagePercentage(lastNight.deep_sleep_minutes, lastNight) + '%' }" title="Deep Sleep"></div>
+                <div class="bg-blue-4 transition-all duration-500"
+                  :style="{ width: getStagePercentage(lastNight.light_sleep_minutes, lastNight) + '%' }"
+                  title="Light Sleep"></div>
+                <div class="bg-purple transition-all duration-500"
+                  :style="{ width: getStagePercentage(lastNight.rem_sleep_minutes, lastNight) + '%' }"
+                  title="REM Sleep"></div>
+                <div class="bg-yellow transition-all duration-500"
+                  :style="{ width: getStagePercentage(lastNight.deep_sleep_minutes, lastNight) + '%' }"
+                  title="Deep Sleep"></div>
               </div>
               <div class="flex gap-4 mt-2 text-xs font-medium">
-                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-4"></span> <span class="text-grey-1">Light</span></div>
-                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple"></span> <span class="text-grey-1">REM</span></div>
-                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow"></span> <span class="text-grey-1">Deep</span></div>
+                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-4"></span> <span
+                    class="text-grey-1">Light</span></div>
+                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple"></span> <span
+                    class="text-grey-1">REM</span></div>
+                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow"></span> <span
+                    class="text-grey-1">Deep</span></div>
               </div>
             </div>
 
             <div class="flex justify-between text-sm text-grey-2 bg-blue-3/30 p-3 rounded-lg flex-wrap gap-2">
               <span class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple" viewBox="0 0 20 20"
+                  fill="currentColor">
+                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
                 <strong>Bedtime:</strong> {{ formatTime(lastNight.bedtime) }}
               </span>
               <span class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v3a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-3a1 1 0 100 2h3zm-7 4a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H1a1 1 0 100 2h3z" clip-rule="evenodd" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow" viewBox="0 0 20 20"
+                  fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M10 2a1 1 0 011 1v3a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-3a1 1 0 100 2h3zm-7 4a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H1a1 1 0 100 2h3z"
+                    clip-rule="evenodd" />
+                </svg>
                 <strong>Wake up:</strong> {{ formatTime(lastNight.wake_time) }}
               </span>
             </div>
           </div>
-          
+
           <div v-else class="text-grey-1 text-sm text-center py-10 bg-blue-2/30 rounded-2xl border border-blue-4/20">
             No sleep data recorded for last night. Connect WHOOP or click Sync WHOOP (last 30 days).
           </div>
@@ -136,22 +144,26 @@
           <h2 class="text-xl font-bold text-grey-2 mb-4">Trends ({{ timeframeLabel }})</h2>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
 
-            <div class="bg-blue-2/40 backdrop-blur-sm p-5 rounded-2xl border border-blue-4/20 flex flex-col items-center justify-center text-center hover:bg-blue-2/50 transition-colors">
+            <div
+              class="bg-blue-2/40 backdrop-blur-sm p-5 rounded-2xl border border-blue-4/20 flex flex-col items-center justify-center text-center hover:bg-blue-2/50 transition-colors">
               <p class="text-grey-1 text-[10px] sm:text-xs uppercase tracking-wider mb-2 font-semibold">Avg Duration</p>
               <p class="text-xl sm:text-2xl font-bold text-white">{{ formatDuration(stats.avgDuration) }}</p>
             </div>
 
-            <div class="bg-blue-2/40 backdrop-blur-sm p-5 rounded-2xl border border-blue-4/20 flex flex-col items-center justify-center text-center hover:bg-blue-2/50 transition-colors">
+            <div
+              class="bg-blue-2/40 backdrop-blur-sm p-5 rounded-2xl border border-blue-4/20 flex flex-col items-center justify-center text-center hover:bg-blue-2/50 transition-colors">
               <p class="text-grey-1 text-[10px] sm:text-xs uppercase tracking-wider mb-2 font-semibold">Avg Quality</p>
               <p class="text-xl sm:text-2xl font-bold text-purple">{{ stats.avgQuality }}%</p>
             </div>
 
-            <div class="bg-blue-2/40 backdrop-blur-sm p-5 rounded-2xl border border-blue-4/20 flex flex-col items-center justify-center text-center hover:bg-blue-2/50 transition-colors">
+            <div
+              class="bg-blue-2/40 backdrop-blur-sm p-5 rounded-2xl border border-blue-4/20 flex flex-col items-center justify-center text-center hover:bg-blue-2/50 transition-colors">
               <p class="text-grey-1 text-[10px] sm:text-xs uppercase tracking-wider mb-2 font-semibold">Efficiency</p>
               <p class="text-xl sm:text-2xl font-bold text-yellow">{{ stats.avgEfficiency }}%</p>
             </div>
 
-            <div class="bg-blue-2/40 backdrop-blur-sm p-5 rounded-2xl border border-blue-4/20 flex flex-col items-center justify-center text-center hover:bg-blue-2/50 transition-colors">
+            <div
+              class="bg-blue-2/40 backdrop-blur-sm p-5 rounded-2xl border border-blue-4/20 flex flex-col items-center justify-center text-center hover:bg-blue-2/50 transition-colors">
               <p class="text-grey-1 text-[10px] sm:text-xs uppercase tracking-wider mb-2 font-semibold">Consistency</p>
               <p class="text-xl sm:text-2xl font-bold text-white">{{ stats.avgConsistency }}%</p>
             </div>
@@ -326,9 +338,9 @@ const formatTime = (dateString) => {
 
 const getScoreColor = (score) => {
   if (!score) return 'text-grey-2';
-  if (score >= 85) return 'text-[#4ade80]'; 
+  if (score >= 85) return 'text-[#4ade80]';
   if (score >= 70) return 'text-yellow';
-  return 'text-[#f87171]'; 
+  return 'text-[#f87171]';
 };
 
 const hasSleepStages = (session) => {
@@ -389,13 +401,13 @@ const startWhoopConnect = async () => {
 const handleSyncData = async () => {
   isSyncing.value = true;
   const token = localStorage.getItem('sessionToken');
-  
+
   try {
     const syncResult = await syncWhoopData(token);
     console.log(`Synced ${syncResult.inserted} entries!`);
-    
+
     await loadData();
-    
+
   } catch (err) {
     console.error("Error syncing data:", err);
     alert("Failed to sync WHOOP data. Please check your connection or re-authenticate.");

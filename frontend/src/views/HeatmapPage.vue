@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-0 pb-0 text-white font-Montserrat">
+  <div class="min-h-0 pb-0 ">
     <div class="mx-auto flex max-w-7xl flex-col gap-3 sm:gap-4">
-      <header class="shrink-0">
+      <header class="flex justify-between items-center mt-6 flex-wrap gap-4 shrink-0">
         <h1 class="text-2xl font-extrabold tracking-tight text-purple sm:text-3xl">Heatmap</h1>
         <p class="mt-0.5 text-xs text-grey-1 sm:text-sm">
           See your sleep patterns month by month
