@@ -1,9 +1,10 @@
 <template>
   <div class="relative overflow-hidden">
-    <div class="pointer-events-none fixed top-[-10%] left-[-10%] z-0 h-64 w-64 rounded-full bg-purple/25 blur-[100px]"
+    <div
+      class="absolute pointer-events-none top-[-10%] left-[-10%] z-0 h-64 w-64 rounded-full bg-purple/25 blur-[100px]"
       aria-hidden="true"></div>
     <div
-      class="pointer-events-none fixed bottom-[-10%] right-[-10%] z-0 h-64 w-64 rounded-full bg-blue-4/25 blur-[100px]"
+      class="absolute pointer-events-none bottom-[-10%] right-[-10%] z-0 h-64 w-64 rounded-full bg-blue-4/25 blur-[100px]"
       aria-hidden="true"></div>
 
     <div class="relative z-10 flex w-full max-w-4xl flex-col gap-8 mx-auto min-h-[12rem]">
