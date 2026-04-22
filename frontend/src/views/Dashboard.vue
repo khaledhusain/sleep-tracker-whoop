@@ -12,16 +12,18 @@
       <header class="flex justify-between items-center mt-6 flex-wrap gap-4">
         <h1 class="text-3xl font-extrabold tracking-tight text-purple">Overview</h1>
 
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3">
           <button @click="handleSyncData" :disabled="isSyncing || isLoading || whoopStatusLoading || !whoopConnected"
-            class="bg-purple hover:bg-purple/80 disabled:opacity-50 text-white text-sm font-semibold py-2.5 px-4 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+            class="rounded-lg bg-purple px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-purple/80 disabled:opacity-50 flex items-center gap-2">
             <span v-if="isSyncing"
               class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
             {{ isSyncing ? 'Syncing...' : 'Sync WHOOP' }}
           </button>
 
-          <select v-model="selectedTimeframe"
-            class="bg-blue-2/80 border border-blue-4/30 text-white text-sm rounded-lg p-2.5 outline-none focus:border-purple transition-colors cursor-pointer shadow-sm">
+          <select
+            v-model="selectedTimeframe"
+            class="dashboard-timeframe-select rounded-lg border border-blue-4/30 bg-blue-2/80 pl-4 pr-10 py-2 text-sm text-white shadow-sm outline-none transition-colors focus:border-purple cursor-pointer [color-scheme:dark]"
+          >
             <option value="night">Last night</option>
             <option value="week">Last week</option>
             <option value="month">Last month</option>
@@ -454,3 +456,14 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', onVisibilityChange);
 });
 </script>
+
+<style scoped>
+/* Custom chevron inset from the right; native arrows sit flush to the edge on Windows. */
+.dashboard-timeframe-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23D3D4DE'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 1rem 1rem;
+  background-position: right 1.1rem center;
+}
+</style>

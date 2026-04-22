@@ -221,7 +221,6 @@ import AddSleepPanel from '@/components/AddSleepPanel.vue';
 
 /** Shown in the main table; everything else appears after row click. */
 const SUMMARY_COLUMNS = [
-  'id',
   'date',
   'nap',
   'bedtime',
@@ -231,7 +230,7 @@ const SUMMARY_COLUMNS = [
   'sleep_performance_score',
 ];
 
-const HIDDEN_KEYS = ['whoop_record_id', 'user_id', 'created_at', 'updated_at'];
+const HIDDEN_KEYS = ['id', 'whoop_record_id', 'user_id', 'created_at', 'updated_at'];
 
 const DETAIL_KEY_ORDER = [
   'light_sleep_minutes',

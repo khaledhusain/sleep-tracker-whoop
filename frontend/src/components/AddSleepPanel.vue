@@ -2,15 +2,8 @@
   <section
     class="add-sleep w-full min-w-0 rounded-2xl border border-blue-4/30 bg-blue-1/50 p-6 shadow-[0_4px_30px_rgba(3,23,77,0.35)]"
   >
-    <header class="mb-5 flex items-start justify-between gap-4">
+    <header class="mb-5">
       <h2 class="text-lg font-bold tracking-tight text-white">Add Sleep</h2>
-      <button
-        type="button"
-        class="shrink-0 rounded-lg px-2 py-1 text-sm font-medium text-grey-1 transition hover:bg-blue-3/40 hover:text-white"
-        @click="onCancel"
-      >
-        Cancel
-      </button>
     </header>
 
     <div class="mb-5">
@@ -224,15 +217,6 @@ const durationLabel = computed(() => {
   if (m === 0) return `${h}h`;
   return `${h}h ${m}m`;
 });
-
-function onCancel() {
-  bedPickerOpen.value = false;
-  wakePickerOpen.value = false;
-  formError.value = '';
-  sleepDate.value = todayYmd();
-  bedMinutes.value = clampStepMinutes(23 * 60);
-  wakeMinutes.value = clampStepMinutes(7 * 60);
-}
 
 async function save() {
   formError.value = '';
