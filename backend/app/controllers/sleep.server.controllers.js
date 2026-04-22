@@ -25,10 +25,33 @@ const create_sleep = (req, res) => {
     return res.status(400).json({ error_message: error.details[0].message });
   }
 
+  const dateCol = toStoredSleepDateColumn(value.date);
+  const bedtimeIso = toStoredInstantIso(value.bedtime);
+  const wakeIso = toStoredInstantIso(value.wake_time);
+  if (!dateCol || !bedtimeIso || !wakeIso) {
+    return res.status(400).json({ error_message: "Invalid date, bedtime, or wake_time" });
+  }
+
   const sleepToCreate = {
     ...value,
+    date: dateCol,
+    bedtime: bedtimeIso,
+    wake_time: wakeIso,
     user_id: req.user_id,
   };
+
+  const spanMin = Math.round(
+    (new Date(wakeIso).getTime() - new Date(bedtimeIso).getTime()) / 60000
+  );
+  if (
+    Number.isFinite(spanMin) &&
+    spanMin > 0 &&
+    sleepToCreate.total_sleep_duration_minutes == null &&
+    sleepToCreate.total_in_bed_minutes == null
+  ) {
+    sleepToCreate.total_sleep_duration_minutes = spanMin;
+    sleepToCreate.total_in_bed_minutes = spanMin;
+  }
 
   sleep.createSleep(sleepToCreate, (err, id) => {
     if (err) {
@@ -50,6 +73,21 @@ function toSqlDateOnly(v) {
   const d = v instanceof Date ? v : new Date(v);
   if (Number.isNaN(d.getTime())) return null;
   return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Store `sleep_entries.date` like WHOOP: calendar `YYYY-MM-DD` (TEXT).
+ * Store `bedtime` / `wake_time` as full ISO strings (TEXT), not JS Date / ms numbers.
+ */
+function toStoredSleepDateColumn(v) {
+  return toSqlDateOnly(v);
+}
+
+function toStoredInstantIso(v) {
+  if (v == null) return null;
+  const d = v instanceof Date ? v : new Date(v);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString();
 }
 
 const get_all_sleeps = (req, res) => {
@@ -141,7 +179,30 @@ const update_sleep = (req, res) => {
     }
   }
 
-  sleep.updateSleep(p.value.id, req.user_id, b.value, (err, changes) => {
+  const patch = { ...b.value };
+  if (patch.date !== undefined) {
+    const d = toStoredSleepDateColumn(patch.date);
+    if (!d) {
+      return res.status(400).json({ error_message: "Invalid date" });
+    }
+    patch.date = d;
+  }
+  if (patch.bedtime !== undefined) {
+    const iso = toStoredInstantIso(patch.bedtime);
+    if (!iso) {
+      return res.status(400).json({ error_message: "Invalid bedtime" });
+    }
+    patch.bedtime = iso;
+  }
+  if (patch.wake_time !== undefined) {
+    const iso = toStoredInstantIso(patch.wake_time);
+    if (!iso) {
+      return res.status(400).json({ error_message: "Invalid wake_time" });
+    }
+    patch.wake_time = iso;
+  }
+
+  sleep.updateSleep(p.value.id, req.user_id, patch, (err, changes) => {
     if (err) {
       return res.status(500).json({
         error_message: err.message || "Internal server error",

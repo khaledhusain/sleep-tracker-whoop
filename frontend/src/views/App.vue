@@ -1,7 +1,11 @@
 <template>
-  <div class="antialiased text-white bg-blue-2 p-5 font-Montserrat min-h-screen flex flex-col">
+  <div
+    class="antialiased text-white bg-blue-2 font-Montserrat flex min-h-dvh flex-col p-5"
+  >
 
-    <div class="flex flex-wrap items-center justify-between gap-4 pb-6 pt-1.5 mb-2 border-b border-blue-4/20">
+    <div
+      class="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-4 border-b border-blue-4/20 pb-6 pt-1.5"
+    >
 
       <router-link to="/" class="flex items-center gap-3 group">
 
@@ -53,14 +57,14 @@
     </div>
 
     <!-- messages -->
-    <div class="flex justify-center">
+    <div class="flex shrink-0 justify-center">
       <div v-if="showMsgs"
         class="absolute z-20 p-3 px-4 m-8 bg-purple  rounded font-bold transition-opacity duration-500 ease-out">
         {{ messages }}
       </div>
     </div>
 
-    <router-view class="flex flex-col min-h-screen bg-blue-1 p-6 isolation-isolate rounded-2xl" />
+    <router-view :class="mainContentClass" />
     <!-- Avoid mix-blend-screen on large fixed layers: it can hide the rest of the page on some GPUs/browsers (Windows). -->
 
   </div>
@@ -75,6 +79,11 @@ export default {
       showMsgs: false,
       isLoggedIn: false,
     };
+  },
+  computed: {
+    mainContentClass() {
+      return 'flex min-w-0 flex-1 flex-col bg-blue-1 isolation-isolate rounded-2xl p-6';
+    },
   },
   methods: {
     syncAuthState() {
