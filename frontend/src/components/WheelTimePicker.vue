@@ -52,17 +52,23 @@
           data-col="ampm"
           @wheel.prevent.stop="onWheelCol('ampm', $event)"
         >
-          <button
-            v-for="row in ampmRows"
-            :key="'a-' + row.delta"
-            type="button"
-            class="wheel-picker__cell wheel-picker__cell--meridiem"
-            :class="cellClass(row.delta)"
-            :aria-selected="row.delta === 0"
-            @click="row.delta !== 0 && nudgeAmpm(row.delta)"
-          >
-            {{ row.label }}
-          </button>
+          <template v-for="row in ampmLayoutRows" :key="row.key">
+            <div
+              v-if="row.kind === 'spacer'"
+              class="wheel-picker__meridiem-spacer"
+              aria-hidden="true"
+            />
+            <button
+              v-else
+              type="button"
+              class="wheel-picker__cell wheel-picker__cell--meridiem"
+              :class="cellClass(row.delta)"
+              :aria-selected="row.delta === 0"
+              @click="row.delta !== 0 && nudgeAmpm(row.delta)"
+            >
+              {{ row.label }}
+            </button>
+          </template>
         </div>
       </div>
     </div>
@@ -147,12 +153,25 @@ const minuteRows = computed(() => {
   });
 });
 
-const ampmRows = computed(() => {
+/** Five slots (spacers + AM/PM) so the column height matches hour/minute and the selection lines up with the highlight. */
+const ampmLayoutRows = computed(() => {
   const { ampm } = toParts(props.modelValue);
-  return [-2, -1, 0, 1, 2].map((delta) => {
-    const v = mod(ampm + delta, 2);
-    return { delta, label: v === 0 ? 'AM' : 'PM' };
-  });
+  if (ampm === 0) {
+    return [
+      { kind: 'spacer', key: 'a-sp-0' },
+      { kind: 'spacer', key: 'a-sp-1' },
+      { kind: 'cell', delta: 0, label: 'AM', key: 'a-am' },
+      { kind: 'cell', delta: 1, label: 'PM', key: 'a-pm' },
+      { kind: 'spacer', key: 'a-sp-2' },
+    ];
+  }
+  return [
+    { kind: 'spacer', key: 'p-sp-0' },
+    { kind: 'cell', delta: -1, label: 'AM', key: 'p-am' },
+    { kind: 'cell', delta: 0, label: 'PM', key: 'p-pm' },
+    { kind: 'spacer', key: 'p-sp-1' },
+    { kind: 'spacer', key: 'p-sp-2' },
+  ];
 });
 
 function cellClass(delta) {
@@ -425,5 +444,13 @@ onBeforeUnmount(() => {
 .wheel-picker__cell--meridiem.wheel-picker__cell--near {
   font-size: 0.72rem;
   letter-spacing: 0.05em;
+}
+
+.wheel-picker__meridiem-spacer {
+  width: 100%;
+  min-height: 2.05rem;
+  flex-shrink: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 </style>
