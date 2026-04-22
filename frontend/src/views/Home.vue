@@ -85,7 +85,7 @@
       <div class="mt-8 text-center pt-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
         <p class="text-[10px] text-purple uppercase tracking-widest mb-1 font-semibold">Developed By</p>
         <p class="text-xs text-grey-1 leading-relaxed">
-          Ellis, Khaled, Joshua, Favour, Abbie, Tomasz, Ace
+          Isaac, Ellis, Khaled, Joshua, Favour, Ace
         </p>
       </div>
 

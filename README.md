@@ -44,6 +44,7 @@
 - Visit `http://localhost:3333/api-docs`
 
 ## Team Members
+- Isaac Rideal
 - Ellis Ollier
 - Khaled Husain
 - Joshua Roberts
