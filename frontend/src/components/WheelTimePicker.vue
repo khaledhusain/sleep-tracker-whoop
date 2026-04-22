@@ -325,12 +325,18 @@ onBeforeUnmount(() => {
 .wheel-picker {
   position: relative;
   margin-top: 0.5rem;
-  padding: 0.15rem 0 0.35rem;
+  padding: 0.25rem 0;
 }
 
 .wheel-picker__frame {
   position: relative;
-  padding: 0.2rem 0.35rem 0.45rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  /* Slightly taller than 5 rows + gaps so the stack can sit centered with even space above/below */
+  min-height: calc(5 * 2.05rem + 4 * 0.08rem + 1.5rem);
+  padding: 0.35rem 0.35rem;
 }
 
 .wheel-picker__highlight {
@@ -351,6 +357,7 @@ onBeforeUnmount(() => {
 .wheel-picker__cols {
   position: relative;
   z-index: 1;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: row;
   align-items: stretch;
@@ -377,12 +384,11 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
   align-self: center;
   padding: 0 0.05rem;
-  font-size: 1.35rem;
+  font-size: 1.18rem;
   font-weight: 700;
   line-height: 1;
   color: color-mix(in srgb, var(--color-grey-2) 90%, white);
   user-select: none;
-  margin-top: 0.15rem;
 }
 
 .wheel-picker__cell {
