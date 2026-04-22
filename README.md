@@ -49,5 +49,4 @@
 - Khaled Husain
 - Joshua Roberts
 - Favour Omoregie
-- Abbie Roberts
 - Ace Blakeburn
