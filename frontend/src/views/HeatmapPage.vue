@@ -1,18 +1,15 @@
 <template>
-  <div class="min-h-0 pb-0 text-white font-Montserrat">
-    <div class="mx-auto flex max-w-7xl flex-col gap-3 sm:gap-4">
-      <header class="shrink-0">
-        <h1 class="text-2xl font-extrabold tracking-tight text-purple sm:text-3xl">Heatmap</h1>
-        <p class="mt-0.5 text-xs text-grey-1 sm:text-sm">
-          See your sleep patterns month by month
-        </p>
+  <div class="flex w-full flex-1 flex-col pb-6">
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-1.5 sm:gap-2">
+      <header class="flex justify-between items-center mt-0 flex-wrap gap-4 shrink-0">
+        
       </header>
 
       <div class="shrink-0">
         <div class="flex items-center justify-center gap-2 sm:gap-3">
           <button
             type="button"
-            class="rounded-lg border border-blue-4/40 bg-blue-3/50 p-1.5 text-purple transition hover:border-purple/50 hover:bg-blue-4/30 hover:text-white disabled:opacity-40 sm:p-2"
+            class="rounded-lg border border-blue-4/40 bg-blue-3/50 p-1.5 text-purple transition hover:border-purple/50 hover:bg-blue-4/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purple/60 disabled:opacity-40 sm:p-2"
             :disabled="loading"
             aria-label="Previous month"
             @click="shiftMonth(-1)"
@@ -26,7 +23,7 @@
           </span>
           <button
             type="button"
-            class="rounded-lg border border-blue-4/40 bg-blue-3/50 p-1.5 text-purple transition hover:border-purple/50 hover:bg-blue-4/30 hover:text-white disabled:opacity-40 sm:p-2"
+            class="rounded-lg border border-blue-4/40 bg-blue-3/50 p-1.5 text-purple transition hover:border-purple/50 hover:bg-blue-4/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purple/60 disabled:opacity-40 sm:p-2"
             :disabled="loading"
             aria-label="Next month"
             @click="shiftMonth(1)"
@@ -58,12 +55,12 @@
 
       <div
         v-else
-        class="grid min-h-0 grid-cols-1 items-start gap-6 max-[900px]:max-h-none min-[901px]:max-h-[calc(100vh-180px)] min-[901px]:grid-cols-[1.8fr_1.1fr]"
+        class="grid grid-cols-1 items-start gap-5 max-[900px]:max-h-none min-[901px]:grid-cols-[minmax(0,1fr)_30rem]"
       >
         <div
-          class="min-w-0 rounded-2xl border border-blue-4/30 bg-[rgb(3_23_77/0.52)] p-4 shadow-[0_4px_30px_rgba(3,23,77,0.35)]"
+          class="min-w-0 w-full max-w-full overflow-hidden rounded-2xl border border-blue-4/30 bg-[rgb(3_23_77/0.52)] p-5 shadow-[0_4px_30px_rgba(3,23,77,0.35)]"
         >
-          <div class="grid grid-cols-7 gap-2.5">
+          <div class="grid grid-cols-7 gap-2.5 min-[901px]:gap-3">
             <div
               v-for="wd in weekDays"
               :key="wd"
@@ -101,47 +98,30 @@
           </div>
 
           <div
-            class="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[0.6rem] text-grey-1 sm:text-[0.65rem]"
+            class="mt-2.5 flex w-full flex-wrap items-center justify-end gap-1 pb-1 sm:mt-3"
+            aria-label="Sleep score colors, low to high"
           >
-            <span class="inline-flex items-center gap-1.5">
-              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#0e5629] ring-1 ring-white/30" /> 90-100
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#126f35] ring-1 ring-white/30" /> 80-89
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#16A34A] ring-1 ring-white/30" /> 70-79
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#FACC15] ring-1 ring-black/20" /> 60-69
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#CA8A04] ring-1 ring-black/20" /> 50-59
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#F97316] ring-1 ring-black/20" /> 40-49
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#DC2626] ring-1 ring-white/30" /> 30-39
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-[#991B1B] ring-1 ring-white/30" /> 0-29
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-blue-2/90 ring-1 ring-blue-4/40" /> No data
-            </span>
+            <span title="0-29" class="size-3 shrink-0 rounded bg-[#991B1B] sm:size-4" />
+            <span title="30-39" class="size-3 shrink-0 rounded bg-[#DC2626] sm:size-4" />
+            <span title="40-49" class="size-3 shrink-0 rounded bg-[#F97316] sm:size-4" />
+            <span title="50-59" class="size-3 shrink-0 rounded bg-[#CA8A04] sm:size-4" />
+            <span title="60-69" class="size-3 shrink-0 rounded bg-[#FACC15] sm:size-4" />
+            <span title="70-79" class="size-3 shrink-0 rounded bg-[#16A34A] sm:size-4" />
+            <span title="80-89" class="size-3 shrink-0 rounded bg-[#126f35] sm:size-4" />
+            <span title="90-100" class="size-3 shrink-0 rounded bg-[#0e5629] sm:size-4" />
           </div>
 
-          <p
-            v-if="!monthHasData"
-            class="mt-3 rounded-lg border border-blue-4/20 bg-blue-2/30 py-3 text-center text-xs text-grey-1"
-          >
-            No sleep data for this month
-          </p>
+          <div v-if="!monthHasData" class="mt-2">
+            <p
+              class="rounded-lg border border-blue-4/20 bg-blue-2/30 py-3 text-center text-xs text-grey-1"
+            >
+              No sleep data for this month
+            </p>
+          </div>
         </div>
 
         <aside
-          class="flex min-w-0 flex-col gap-0 overflow-y-auto rounded-2xl border border-blue-4/30 bg-[rgb(3_23_77/0.52)] p-[18px] shadow-[0_4px_30px_rgba(3,23,77,0.35)] max-[900px]:static max-[900px]:max-h-none max-[900px]:overflow-y-visible sm:p-5 min-[901px]:sticky min-[901px]:top-5 min-[901px]:max-h-[calc(100vh-180px)] min-[901px]:self-start"
+          class="flex w-full min-w-0 flex-col gap-0 overflow-x-hidden rounded-2xl border border-blue-4/30 bg-[rgb(3_23_77/0.52)] p-5 shadow-[0_4px_30px_rgba(3,23,77,0.35)] max-[900px]:static max-[900px]:min-h-0 min-[901px]:max-w-[30rem] min-[901px]:shrink-0 min-[901px]:self-start min-[901px]:sticky min-[901px]:top-5"
         >
           <!-- 1. Header -->
           <header
@@ -168,7 +148,7 @@
             <!-- 2. Primary metrics (boxed): Score, Duration, Time in bed -->
             <div
               v-if="hasAnyPrimaryMetric"
-              class="mb-0 grid grid-cols-[repeat(auto-fit,minmax(108px,1fr))] items-stretch gap-3 min-[600px]:grid-cols-3"
+              :class="primaryMetricsGridClass"
             >
               <div
                 v-if="primaryScoreShown"
@@ -413,6 +393,17 @@ const hasAnyPrimaryMetric = computed(
     primaryScoreShown.value || primaryDurationShown.value || primaryInBedShown.value
 );
 
+const primaryMetricsGridClass = computed(() => {
+  let n = 0;
+  if (primaryScoreShown.value) n++;
+  if (primaryDurationShown.value) n++;
+  if (primaryInBedShown.value) n++;
+  const base = 'mb-0 grid min-w-0 items-stretch gap-3';
+  if (n <= 1) return `${base} grid-cols-1`;
+  if (n === 2) return `${base} grid-cols-2`;
+  return `${base} grid-cols-1 min-[520px]:grid-cols-3`;
+});
+
 const efficiencyShown = computed(() => {
   const e = selectedEntry.value;
   if (!e) return false;
@@ -458,7 +449,8 @@ function cellHoverLabel(cell) {
 }
 
 function cellButtonClass(cell) {
-  const base = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-purple/60';
+  const base =
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purple/70';
   if (cell.type !== 'day') return base;
 
   const today = isCellToday(cell);
@@ -486,8 +478,7 @@ function cellButtonClass(cell) {
 
   let ring = '';
   if (sel) {
-    ring =
-      'z-10 ring-2 ring-sky-400/90 ring-offset-2 ring-offset-[#03174D] shadow-[0_0_12px_rgba(56,189,248,0.35)]';
+    ring = 'z-10 !border-[3px] !border-sky-400';
   } else if (today) {
     ring = 'ring-1 ring-white/35 ring-inset';
   }

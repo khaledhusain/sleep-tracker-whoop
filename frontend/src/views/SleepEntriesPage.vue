@@ -1,7 +1,8 @@
 <template>
-  <div class="min-h-full text-white font-Montserrat">
-    <div class="mx-auto max-w-[1600px] flex flex-col gap-6">
-      <header class="flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-8">
+      
+      <header class="flex justify-between items-center mt-6 flex-wrap gap-4">
         <div>
           <h1 class="text-3xl font-extrabold tracking-tight text-purple">Sleep entries</h1>
         </div>
@@ -29,44 +30,11 @@
         {{ error }}
       </p>
 
-      <section class="rounded-2xl border border-blue-4/30 bg-blue-1/50 p-6 shadow-[0_4px_30px_rgba(3,23,77,0.35)]">
-        <h2 class="text-lg font-bold text-white mb-1">Add sleep manually</h2>
-        <form class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end" @submit.prevent="submitManual">
-          <div class="flex flex-col gap-1">
-            <label for="manual-bedtime" class="text-xs font-semibold uppercase tracking-wide text-grey-1">Bedtime</label>
-            <input
-              id="manual-bedtime"
-              v-model="manualBedtime"
-              type="datetime-local"
-              required
-              class="rounded-lg border border-blue-4/40 bg-blue-2/80 px-3 py-2.5 text-sm text-white outline-none focus:border-purple"
-            />
-          </div>
-          <div class="flex flex-col gap-1">
-            <label for="manual-wake" class="text-xs font-semibold uppercase tracking-wide text-grey-1">Wake time</label>
-            <input
-              id="manual-wake"
-              v-model="manualWake"
-              type="datetime-local"
-              required
-              class="rounded-lg border border-blue-4/40 bg-blue-2/80 px-3 py-2.5 text-sm text-white outline-none focus:border-purple"
-            />
-          </div>
-          <button
-            type="submit"
-            :disabled="savingManual"
-            class="rounded-lg bg-purple px-5 py-2.5 text-sm font-semibold text-blue-1 hover:bg-purple/90 disabled:opacity-50 sm:mb-0"
-          >
-            {{ savingManual ? 'Saving…' : 'Save entry' }}
-          </button>
-        </form>
-        <p v-if="formError" class="mt-3 text-sm text-[#fca5a5]">{{ formError }}</p>
-        <p v-if="formSuccess" class="mt-3 text-sm text-[#4ade80]">{{ formSuccess }}</p>
-      </section>
+      <AddSleepPanel @saved="onManualSleepSaved" />
 
       <div
         v-if="loading"
-        class="flex flex-col items-center justify-center py-24 text-grey-1"
+        class="flex w-full min-w-0 flex-col items-center justify-center py-24 text-grey-1"
       >
         <div class="h-10 w-10 animate-spin rounded-full border-4 border-blue-3 border-t-purple" />
         <p class="mt-4 text-sm">Loading entries…</p>
@@ -74,14 +42,14 @@
 
       <div
         v-else-if="entries.length === 0"
-        class="rounded-2xl border border-blue-4/30 bg-blue-1/40 py-12 text-center text-grey-1"
+        class="w-full min-w-0 rounded-xl border border-blue-4/30 bg-blue-1/50 px-4 py-12 text-center text-grey-1 shadow-[0_4px_30px_rgba(3,23,77,0.35)]"
       >
-        No rows in the table yet. Use the form above or sync from WHOOP on the dashboard.
+        No rows in the table yet. Add sleep above or sync from WHOOP on the dashboard.
       </div>
 
       <div
         v-else
-        class="overflow-x-auto rounded-xl border border-blue-4/30 bg-blue-1/50 shadow-[0_4px_30px_rgba(3,23,77,0.35)]"
+        class="w-full min-w-0 overflow-x-auto rounded-xl border border-blue-4/30 bg-blue-1/50 shadow-[0_4px_30px_rgba(3,23,77,0.35)]"
       >
         <p class="border-b border-blue-4/30 bg-blue-2/40 px-4 py-2 text-xs text-grey-1">
           Click a row for sleep stages, efficiency, and recovery metrics.
@@ -248,11 +216,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { fetchSleepData, resetAllSleepData, createManualSleep } from '@/services/sleep.service';
+import { fetchSleepData, resetAllSleepData } from '@/services/sleep.service';
+import AddSleepPanel from '@/components/AddSleepPanel.vue';
 
 /** Shown in the main table; everything else appears after row click. */
 const SUMMARY_COLUMNS = [
-  'id',
   'date',
   'nap',
   'bedtime',
@@ -262,7 +230,7 @@ const SUMMARY_COLUMNS = [
   'sleep_performance_score',
 ];
 
-const HIDDEN_KEYS = ['whoop_record_id', 'user_id', 'created_at', 'updated_at'];
+const HIDDEN_KEYS = ['id', 'whoop_record_id', 'user_id', 'created_at', 'updated_at'];
 
 const DETAIL_KEY_ORDER = [
   'light_sleep_minutes',
@@ -320,11 +288,6 @@ const loading = ref(true);
 const resetting = ref(false);
 const error = ref('');
 
-const manualBedtime = ref('');
-const manualWake = ref('');
-const savingManual = ref(false);
-const formError = ref('');
-const formSuccess = ref('');
 const expandedRowKey = ref(null);
 const sortKey = ref('date');
 const sortDir = ref('desc');
@@ -499,51 +462,8 @@ function hasAnyExpansionContent(row) {
   );
 }
 
-function localNightDateIso(bed) {
-  const y = bed.getFullYear();
-  const m = String(bed.getMonth() + 1).padStart(2, '0');
-  const day = String(bed.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}T12:00:00.000Z`;
-}
-
-async function submitManual() {
-  formError.value = '';
-  formSuccess.value = '';
-  if (!manualBedtime.value || !manualWake.value) {
-    formError.value = 'Set both bedtime and wake time.';
-    return;
-  }
-  const bed = new Date(manualBedtime.value);
-  const wake = new Date(manualWake.value);
-  if (Number.isNaN(bed.getTime()) || Number.isNaN(wake.getTime())) {
-    formError.value = 'Invalid date or time.';
-    return;
-  }
-  if (wake.getTime() <= bed.getTime()) {
-    formError.value = 'Wake time must be after bedtime.';
-    return;
-  }
-
-  savingManual.value = true;
-  const token = localStorage.getItem('sessionToken');
-  try {
-    await createManualSleep(token, {
-      date: localNightDateIso(bed),
-      bedtime: bed.toISOString(),
-      wake_time: wake.toISOString()
-    });
-    manualWake.value = '';
-    manualBedtime.value = '';
-    await loadEntries();
-    formSuccess.value = 'Saved. It should appear in the table below.';
-    setTimeout(() => {
-      formSuccess.value = '';
-    }, 4000);
-  } catch (e) {
-    formError.value = e.message || 'Could not save entry.';
-  } finally {
-    savingManual.value = false;
-  }
+async function onManualSleepSaved() {
+  await loadEntries();
 }
 
 function humanizeKey(k) {

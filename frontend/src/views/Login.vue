@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full h-full min-h-[85vh] flex flex-col items-center justify-center font-Montserrat text-white">
+  <div class="relative w-full h-full min-h-[85vh] flex flex-col items-center justify-center">
 
     <div
       class="bg-blue-2/40 backdrop-blur-md p-8 rounded-2xl border border-blue-4/20 shadow-[0_4px_30px_rgba(3,23,77,0.5)] w-full max-w-md flex flex-col items-center z-10">
@@ -11,7 +11,8 @@
           clip-rule="evenodd" />
       </svg>
       <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-purple to-white mb-2">
-        Welcome Back</h1>
+        Welcome Back
+      </h1>
       <h2 class="text-grey-1 text-sm mb-8 text-center">Sign in to continue tracking your sleep</h2>
 
       <form @submit.prevent="handleSubmit" class="flex flex-col w-full gap-4">
@@ -75,7 +76,7 @@ export default {
           this.submitted = false;
           this.error = "";
           localStorage.setItem("msgs", "Login successful!");
-          this.$router.push("/");
+          this.$router.push("/dashboard");
         })
         .catch(error => {
           this.error = error;

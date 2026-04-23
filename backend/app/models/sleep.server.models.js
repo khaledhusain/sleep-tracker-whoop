@@ -1,5 +1,21 @@
 const db = require('../utils/database');
 
+function storedDateOnly(v) {
+  if (v == null) return v;
+  if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.trim())) return v.trim();
+  const d = v instanceof Date ? v : new Date(v);
+  if (Number.isNaN(d.getTime())) return v;
+  return d.toISOString().slice(0, 10);
+}
+
+function storedIsoInstant(v) {
+  if (v == null) return v;
+  if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) return v;
+  const d = v instanceof Date ? v : new Date(v);
+  if (Number.isNaN(d.getTime())) return v;
+  return d.toISOString();
+}
+
 const createSleep = (sleep, done) => {
   const query = `
     INSERT INTO sleep_entries (
@@ -14,10 +30,10 @@ const createSleep = (sleep, done) => {
   const values = [
     sleep.whoop_record_id ?? null,
     sleep.user_id,
-    sleep.date,
+    storedDateOnly(sleep.date),
     sleep.nap ? 1 : 0,
-    sleep.bedtime,
-    sleep.wake_time,
+    storedIsoInstant(sleep.bedtime),
+    storedIsoInstant(sleep.wake_time),
 
     sleep.total_in_bed_minutes ?? null,
     sleep.total_sleep_duration_minutes ?? null,
@@ -86,7 +102,7 @@ const updateSleep = (id, user_id, sleep, done) => {
 
   if (sleep.date !== undefined) {
     fields.push("date = ?");
-    values.push(sleep.date);
+    values.push(storedDateOnly(sleep.date));
   }
 
   if (sleep.nap !== undefined) {
@@ -96,12 +112,12 @@ const updateSleep = (id, user_id, sleep, done) => {
 
   if (sleep.bedtime !== undefined) {
     fields.push("bedtime = ?");
-    values.push(sleep.bedtime);
+    values.push(storedIsoInstant(sleep.bedtime));
   }
 
   if (sleep.wake_time !== undefined) {
     fields.push("wake_time = ?");
-    values.push(sleep.wake_time);
+    values.push(storedIsoInstant(sleep.wake_time));
   }
 
   if (sleep.total_in_bed_minutes !== undefined) {

@@ -21,9 +21,21 @@ export function toLocalDayKey(d) {
  * @param {string} iso
  */
 export function dayKeyFromEntryDate(iso) {
-  if (!iso) return null;
+  if (iso == null || iso === '') return null;
+  if (typeof iso === 'number' && Number.isFinite(iso)) {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    return toLocalDayKey(d);
+  }
   const s = String(iso).trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  if (/^\d+(\.\d+)?$/.test(s)) {
+    const n = Number(s);
+    if (Number.isFinite(n)) {
+      const d = new Date(n);
+      if (!Number.isNaN(d.getTime())) return toLocalDayKey(d);
+    }
+  }
   const d = new Date(s);
   if (Number.isNaN(d.getTime())) return null;
   return toLocalDayKey(d);
