@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-blue-1 text-white relative flex flex-col font-Montserrat p-6 isolation-isolate">
-    <!-- Avoid mix-blend-screen on large fixed layers: it can hide the rest of the page on some GPUs/browsers (Windows). -->
     <div
       class="pointer-events-none fixed top-[-10%] left-[-10%] z-0 h-64 w-64 rounded-full bg-purple/25 blur-[100px]"
       aria-hidden="true"
@@ -101,7 +100,7 @@
             <div v-if="hasSleepStages(lastNight)" class="mb-5">
               <div class="flex justify-between text-xs text-grey-1 mb-2">
                 <span>Sleep stages (light + deep + REM)</span>
-                <span>{{ formatDuration((lastNight.light_sleep_minutes || 0) + (lastNight.deep_sleep_minutes || 0) + (lastNight.rem_sleep_minutes || 0)) }}</span>
+                <span>{{ formatDuration(Number(lastNight.light_sleep_minutes || 0) + Number(lastNight.deep_sleep_minutes || 0) + Number(lastNight.rem_sleep_minutes || 0)) }}</span>
               </div>
               <div class="h-3 w-full bg-blue-3 rounded-full flex overflow-hidden">
                 <div class="bg-blue-4 transition-all duration-500" :style="{ width: getStagePercentage(lastNight.light_sleep_minutes, lastNight) + '%' }" title="Light Sleep"></div>
@@ -181,7 +180,6 @@ const whoopConnected = ref(false);
 const whoopStatusLoading = ref(true);
 const connectBanner = ref('');
 
-/** YYYY-MM-DD for a session row (local calendar day; avoids UTC shifting date-only strings). */
 function sessionDayKey(session) {
   const d = session?.date;
   if (!d) return '';
@@ -212,10 +210,6 @@ function isNap(session) {
   return n === true || n === 1 || n === '1';
 }
 
-/**
- * Latest main sleep: non-naps only, highest wake_time.
- * Avoids picking today's nap when sorting only by calendar `date`.
- */
 function pickLatestMainSleep(rows) {
   if (!rows.length) return null;
   const mains = rows.filter((s) => !isNap(s));
@@ -284,21 +278,25 @@ const stats = computed(() => {
   let conN = 0;
 
   data.forEach((session) => {
-    const m = session.total_sleep_duration_minutes;
-    if (m != null && m > 0) {
+    const m = Number(session.total_sleep_duration_minutes || 0);
+    if (m > 0) {
       durSum += m;
       durN += 1;
     }
     if (session.sleep_performance_score != null) {
-      qualSum += session.sleep_performance_score;
+      qualSum += Number(session.sleep_performance_score);
       qualN += 1;
     }
     if (session.sleep_efficiency != null) {
-      effSum += session.sleep_efficiency;
+      let eff = Number(session.sleep_efficiency);
+      if (eff <= 1 && eff > 0) eff *= 100; 
+      effSum += eff;
       effN += 1;
     }
     if (session.sleep_consistency != null) {
-      conSum += session.sleep_consistency;
+      let con = Number(session.sleep_consistency);
+      if (con <= 1 && con > 0) con *= 100;
+      conSum += con;
       conN += 1;
     }
   });
@@ -313,8 +311,9 @@ const stats = computed(() => {
 
 const formatDuration = (minutes) => {
   if (!minutes) return '0h 0m';
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
+  const mins = Number(minutes);
+  const h = Math.floor(mins / 60);
+  const m = Math.round(mins % 60); 
   return `${h}h ${m}m`;
 };
 
@@ -337,9 +336,14 @@ const hasSleepStages = (session) => {
 
 const getStagePercentage = (stageMinutes, session) => {
   if (!stageMinutes) return 0;
-  const total = (session.light_sleep_minutes || 0) + (session.deep_sleep_minutes || 0) + (session.rem_sleep_minutes || 0);
+  
+  const light = Number(session.light_sleep_minutes || 0);
+  const deep = Number(session.deep_sleep_minutes || 0);
+  const rem = Number(session.rem_sleep_minutes || 0);
+  
+  const total = light + deep + rem;
   if (total === 0) return 0;
-  return (stageMinutes / total) * 100;
+  return (Number(stageMinutes) / total) * 100;
 };
 
 const loadWhoopStatus = async () => {
