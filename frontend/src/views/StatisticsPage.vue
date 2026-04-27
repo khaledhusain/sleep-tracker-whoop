@@ -14,11 +14,13 @@
           to="/session"
           class="bg-purple hover:bg-blue-4 text-blue-1 px-4 py-2 rounded-xl font-bold transition-all active:scale-95 shadow-[0_0_20px_rgba(153,163,251,0.3)]"
         >
-          Session
+          Individual Session
         </router-link>
       </header>
 
       <section class="bg-blue-2/30 p-6 rounded-xl border border-blue-4/20 shadow-[0_0_20px_rgba(153,163,251,0.1)]">
+        <p v-if="isLoading" class="mb-4 text-sm text-grey-1">Loading statistics...</p>
+        <p v-else-if="!sessions.length" class="mb-4 text-sm text-grey-1">No sleep sessions available for statistics.</p>
         <h2 class="text-xl font-bold text-grey-2 mb-4">Stats Overview</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -67,7 +69,7 @@
               v-for="(value, index) in scoreTrend"
               :key="index"
               :cx="(index / Math.max(scoreTrend.length - 1, 1)) * 100"
-              :cy="100 - value"
+              :cy="100 - normalizeScore(value)"
               r="2.4"
               fill="#FFE7BF"
             />
@@ -132,32 +134,44 @@
 </template>
 
 <script>
-import sleepData from '../services/SleepData'
+import { fetchWhoopSleepHistory } from '../services/sleep.service'
 
 export default {
   name: 'StatisticsPage',
   data() {
     return {
-      sessions: sleepData
+      sessions: [],
+      isLoading: true
     }
+  },
+  async mounted() {
+    await this.loadSessions()
   },
   computed: {
     weeklyStats() {
-      return [...this.sessions].slice(0, 7).reverse().map((s) => ({
+      return [...this.sessions]
+        .sort((a, b) => {
+          const wa = new Date(a.wake_time || a.bedtime || 0).getTime()
+          const wb = new Date(b.wake_time || b.bedtime || 0).getTime()
+          return wb - wa
+        })
+        .slice(0, 7)
+        .reverse()
+        .map((s) => ({
         day: this.dayShort(s.date),
-        hours: s.durationHours,
-        score: s.sleepScore
+        hours: Math.round((Number(s.total_sleep_duration_minutes || 0) / 60) * 10) / 10,
+        score: Number(s.sleep_performance_score || 0)
       }))
     },
     avgScore() {
-      return Math.round(this.average(this.sessions.map((s) => s.sleepScore)))
+      return Math.round(this.average(this.sessions.map((s) => Number(s.sleep_performance_score || 0))))
     },
     avgDuration() {
-      return this.formatHours(this.average(this.sessions.map((s) => s.durationHours)))
+      return this.formatDuration(this.average(this.sessions.map((s) => Number(s.total_sleep_duration_minutes || 0))))
     },
     bestNight() {
-      const best = [...this.sessions].sort((a, b) => b.sleepScore - a.sleepScore)[0]
-      return best ? best.sleepScore : 0
+      const best = [...this.sessions].sort((a, b) => Number(b.sleep_performance_score || 0) - Number(a.sleep_performance_score || 0))[0]
+      return best ? Number(best.sleep_performance_score || 0) : 0
     },
     scoreTrend() {
       return this.weeklyStats.map((item) => item.score)
@@ -166,7 +180,7 @@ export default {
       return this.scoreTrend
         .map((value, index) => {
           const x = (index / Math.max(this.scoreTrend.length - 1, 1)) * 100
-          const y = 100 - value
+          const y = 100 - this.normalizeScore(value)
           return `${x},${y}`
         })
         .join(' ')
@@ -175,12 +189,18 @@ export default {
       return Math.max(...this.weeklyStats.map((d) => d.hours), 1)
     },
     stagePercents() {
-      const latest = this.sessions[0]
+      if (!this.sessions.length) return []
+      const latest = [...this.sessions]
+        .sort((a, b) => {
+          const wa = new Date(a.wake_time || a.bedtime || 0).getTime()
+          const wb = new Date(b.wake_time || b.bedtime || 0).getTime()
+          return wb - wa
+        })[0]
       const stages = [
-        { label: 'Deep', value: latest.deepSleepHours, color: '#99A3FB' },
-        { label: 'REM', value: latest.remHours, color: '#FFE7BF' },
-        { label: 'Light', value: latest.lightSleepHours, color: '#6D75B0' },
-        { label: 'Awake', value: latest.awakeHours, color: '#C5C6D0' }
+        { label: 'Deep', value: Number(latest.deep_sleep_minutes || 0), color: '#99A3FB' },
+        { label: 'REM', value: Number(latest.rem_sleep_minutes || 0), color: '#FFE7BF' },
+        { label: 'Light', value: Number(latest.light_sleep_minutes || 0), color: '#6D75B0' },
+        { label: 'Awake', value: Number(latest.awake_minutes || 0), color: '#C5C6D0' }
       ]
       const total = stages.reduce((sum, s) => sum + s.value, 0) || 1
       return stages.map((stage) => ({
@@ -190,27 +210,60 @@ export default {
     }
   },
   methods: {
+    async loadSessions() {
+      this.isLoading = true
+      const token = localStorage.getItem('sessionToken')
+      if (!token) {
+        this.sessions = []
+        this.isLoading = false
+        return
+      }
+      try {
+        const rows = await fetchWhoopSleepHistory(token)
+        this.sessions = (Array.isArray(rows) ? rows : []).filter((session) => !this.isNap(session))
+      } catch (error) {
+        console.error('Failed to load statistics sessions:', error)
+        this.sessions = []
+      } finally {
+        this.isLoading = false
+      }
+    },
+    isNap(session) {
+      const n = session?.nap
+      return n === true || n === 1 || n === '1'
+    },
     average(values) {
       if (!values.length) return 0
       return values.reduce((sum, value) => sum + Number(value || 0), 0) / values.length
     },
-    formatHours(hours) {
-      const wholeHours = Math.floor(hours)
-      const minutes = Math.round((hours - wholeHours) * 60)
-      return `${wholeHours}h ${minutes}m`
+    formatDuration(minutes) {
+      const wholeHours = Math.floor(minutes / 60)
+      const mins = Math.round(minutes % 60)
+      return `${wholeHours}h ${mins}m`
+    },
+    normalizeScore(score) {
+      const safe = Number(score || 0)
+      if (Number.isNaN(safe)) return 0
+      return Math.max(0, Math.min(100, safe))
     },
     dayShort(date) {
-      return new Date(date).toLocaleDateString('en-GB', { weekday: 'short' })
+      const d = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T12:00:00`) : new Date(date)
+      if (Number.isNaN(d.getTime())) return '--'
+      return d.toLocaleDateString('en-GB', { weekday: 'short' })
     },
     timeToDecimal(time) {
-      const [hours, minutes] = time.split(':').map(Number)
-      return hours + minutes / 60
+      if (!time) return null
+      const d = new Date(time)
+      if (Number.isNaN(d.getTime())) return null
+      return d.getHours() + d.getMinutes() / 60
     },
     averageBedtime() {
       const values = this.sessions.map((s) => {
         const decimal = this.timeToDecimal(s.bedtime)
+        if (decimal == null) return null
         return decimal < 12 ? decimal + 24 : decimal
-      })
+      }).filter((v) => v != null)
+      if (!values.length) return '--:--'
       const avg = this.average(values)
       const normalized = avg >= 24 ? avg - 24 : avg
       const hours = Math.floor(normalized)
