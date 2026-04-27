@@ -39,6 +39,14 @@
           class="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-grey-2 transition-all hover:border-blue-4/30 hover:bg-blue-3/80 hover:text-white">
           Heatmap
         </router-link>
+        <router-link to="/statistics" active-class="bg-purple text-blue-1 shadow-[0_0_12px_rgba(153,163,251,0.35)]"
+          class="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-grey-2 transition-all hover:border-blue-4/30 hover:bg-blue-3/80 hover:text-white">
+          Statistics
+        </router-link>
+        <router-link to="/session" active-class="bg-purple text-blue-1 shadow-[0_0_12px_rgba(153,163,251,0.35)]"
+          class="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-grey-2 transition-all hover:border-blue-4/30 hover:bg-blue-3/80 hover:text-white">
+          Individual Session
+        </router-link>
       </nav>
 
       <router-link to="/user" class="flex gap-3 relative group">
