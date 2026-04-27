@@ -132,7 +132,7 @@
 </template>
 
 <script>
-import sleepData from '../data/SleepData.js'
+import sleepData from '../services/SleepData'
 
 export default {
   name: 'StatisticsPage',
