@@ -19,19 +19,21 @@
       </header>
 
       <section class="bg-blue-2/30 p-5 rounded-xl border border-blue-4/20 shadow-[0_0_20px_rgba(153,163,251,0.1)]">
+        <p v-if="isLoading" class="text-sm text-grey-1">Loading sessions...</p>
+        <p v-else-if="!sessions.length" class="text-sm text-grey-1">No sleep sessions found yet.</p>
         <div class="flex flex-wrap gap-2">
           <button
             v-for="session in sessions"
-            :key="session.id"
-            @click="selectSession(session.date)"
+            :key="session.id || `${session.date}-${session.bedtime}`"
+            @click="selectSession(session)"
             class="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
             :class="
-              currentSessionDate === session.date
+              currentSessionKey === sessionKey(session)
                 ? 'bg-purple text-blue-1'
                 : 'bg-blue-3 text-grey-2 hover:bg-blue-4 hover:text-white'
             "
           >
-            {{ formatSessionButton(session.date) }}
+            {{ formatSessionButton(session) }}
           </button>
         </div>
       </section>
@@ -47,8 +49,8 @@
           </div>
           <div class="text-right">
             <p class="text-grey-1 text-xs uppercase tracking-wider mb-1">Quality</p>
-            <p class="text-2xl font-bold" :class="getScoreColor(currentSession.sleepScore)">
-              {{ currentSession.sleepScore }}%
+            <p class="text-2xl font-bold" :class="getScoreColor(currentSession.sleep_performance_score)">
+              {{ currentSession.sleep_performance_score || '--' }}%
             </p>
           </div>
         </div>
@@ -56,11 +58,11 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-5">
           <div class="bg-blue-3 p-4 rounded-xl">
             <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Duration</p>
-            <p class="text-xl font-bold text-white">{{ formatHours(currentSession.durationHours) }}</p>
+            <p class="text-xl font-bold text-white">{{ formatDuration(currentSession.total_sleep_duration_minutes) }}</p>
           </div>
           <div class="bg-blue-3 p-4 rounded-xl">
             <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Efficiency</p>
-            <p class="text-xl font-bold text-white">{{ currentSession.efficiency }}%</p>
+            <p class="text-xl font-bold text-white">{{ formatPercent(currentSession.sleep_efficiency) }}</p>
           </div>
           <div class="bg-blue-3 p-4 rounded-xl">
             <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Bedtime</p>
@@ -68,7 +70,7 @@
           </div>
           <div class="bg-blue-3 p-4 rounded-xl">
             <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Wake Up</p>
-            <p class="text-xl font-bold text-white">{{ formatTime(currentSession.wakeTime) }}</p>
+            <p class="text-xl font-bold text-white">{{ formatTime(currentSession.wake_time) }}</p>
           </div>
         </div>
       </section>
@@ -80,14 +82,14 @@
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-bold text-grey-2">Sleep Timeline</h2>
           <span class="text-grey-1 text-sm">
-            {{ formatTime(currentSession.bedtime) }} - {{ formatTime(currentSession.wakeTime) }}
+            {{ formatTime(currentSession.bedtime) }} - {{ formatTime(currentSession.wake_time) }}
           </span>
         </div>
 
         <div class="overflow-hidden rounded-full bg-blue-3 h-7">
           <div class="flex h-full w-full">
             <div
-              v-for="(item, index) in currentSession.timeline"
+              v-for="(item, index) in timeline"
               :key="index"
               class="h-full"
               :style="{ width: item.width, backgroundColor: item.color }"
@@ -105,7 +107,7 @@
               <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: stage.color }"></span>
               <span class="text-grey-2 text-sm">{{ stage.label }}</span>
             </div>
-            <p class="mt-2 text-lg font-bold text-white">{{ stage.value }}h</p>
+            <p class="mt-2 text-lg font-bold text-white">{{ formatDuration(stage.value) }}</p>
           </div>
         </div>
       </section>
@@ -118,23 +120,23 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="bg-blue-3 p-4 rounded-xl">
-            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Time to Fall Asleep</p>
-            <p class="text-lg font-bold text-white">{{ currentSession.fallAsleepMinutes }} min</p>
+            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Time in Bed</p>
+            <p class="text-lg font-bold text-white">{{ formatDuration(currentSession.total_in_bed_minutes) }}</p>
           </div>
 
           <div class="bg-blue-3 p-4 rounded-xl">
-            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Awakenings</p>
-            <p class="text-lg font-bold text-white">{{ currentSession.awakenings }}</p>
+            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Awake Time</p>
+            <p class="text-lg font-bold text-white">{{ formatDuration(currentSession.awake_minutes) }}</p>
           </div>
 
           <div class="bg-blue-3 p-4 rounded-xl">
-            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Mood</p>
-            <p class="text-lg font-bold text-purple">{{ currentSession.mood }}</p>
+            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Consistency</p>
+            <p class="text-lg font-bold text-purple">{{ formatPercent(currentSession.sleep_consistency) }}</p>
           </div>
 
           <div class="bg-blue-3 p-4 rounded-xl">
             <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Score Label</p>
-            <p class="text-lg font-bold text-white">{{ scoreLabel(currentSession.sleepScore) }}</p>
+            <p class="text-lg font-bold text-white">{{ scoreLabel(currentSession.sleep_performance_score) }}</p>
           </div>
         </div>
       </section>
@@ -144,37 +146,29 @@
         class="bg-blue-2/30 p-6 rounded-xl border border-blue-4/20 shadow-[0_0_20px_rgba(153,163,251,0.1)]"
       >
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold text-grey-2">Morning Reflection</h2>
-          <span class="text-yellow font-semibold">{{ currentSession.mood }}</span>
+          <h2 class="text-xl font-bold text-grey-2">Additional Metrics</h2>
+          <span class="text-yellow font-semibold">{{ scoreLabel(currentSession.sleep_performance_score) }}</span>
         </div>
 
-        <div class="grid grid-cols-3 gap-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div class="bg-blue-3 p-4 rounded-xl text-center">
-            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Energy</p>
-            <p class="text-lg font-bold text-white">{{ currentSession.energy }}/10</p>
+            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Respiratory Rate</p>
+            <p class="text-lg font-bold text-white">{{ formatRespiratoryRate(currentSession.respiratory_rate) }}</p>
           </div>
           <div class="bg-blue-3 p-4 rounded-xl text-center">
-            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Stress</p>
-            <p class="text-lg font-bold text-white">{{ currentSession.stress }}/10</p>
+            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Nap</p>
+            <p class="text-lg font-bold text-white">{{ isNap(currentSession) ? 'Yes' : 'No' }}</p>
           </div>
           <div class="bg-blue-3 p-4 rounded-xl text-center">
-            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Focus</p>
-            <p class="text-lg font-bold text-white">{{ currentSession.focus }}/10</p>
+            <p class="text-grey-1 text-xs uppercase tracking-wider mb-2">Date</p>
+            <p class="text-lg font-bold text-white">{{ formatSessionButton(currentSession) }}</p>
           </div>
         </div>
 
         <div class="bg-blue-3 p-4 rounded-xl">
-          <p class="text-grey-2 text-sm leading-relaxed">{{ currentSession.note }}</p>
-        </div>
-
-        <div class="flex flex-wrap gap-2 mt-4">
-          <span
-            v-for="tag in currentSession.tags"
-            :key="tag"
-            class="bg-blue-4/20 text-grey-2 border border-blue-4/30 px-3 py-1 rounded-full text-xs"
-          >
-            {{ tag }}
-          </span>
+          <p class="text-grey-2 text-sm leading-relaxed">
+            Data is loaded from your synced sleep history.
+          </p>
         </div>
       </section>
     </div>
@@ -182,59 +176,131 @@
 </template>
 
 <script>
-import sleepData from '../services/SleepData.js'
+import { fetchWhoopSleepHistory } from '../services/sleep.service'
 
 export default {
   name: 'IndividualSleepSessionPage',
   data() {
     return {
-      sessions: sleepData,
-      currentSessionDate: sleepData[0]?.date || ''
+      sessions: [],
+      currentSessionKey: '',
+      isLoading: true
     }
   },
   computed: {
     currentSession() {
-      return this.sessions.find((s) => s.date === this.currentSessionDate) || null
+      return this.sessions.find((s) => this.sessionKey(s) === this.currentSessionKey) || null
     },
     sleepStages() {
       if (!this.currentSession) return []
       return [
-        { label: 'Deep', value: this.currentSession.deepSleepHours, color: '#99A3FB' },
-        { label: 'REM', value: this.currentSession.remHours, color: '#FFE7BF' },
-        { label: 'Light', value: this.currentSession.lightSleepHours, color: '#6D75B0' },
-        { label: 'Awake', value: this.currentSession.awakeHours, color: '#C5C6D0' }
+        { label: 'Deep', value: Number(this.currentSession.deep_sleep_minutes || 0), color: '#99A3FB' },
+        { label: 'REM', value: Number(this.currentSession.rem_sleep_minutes || 0), color: '#FFE7BF' },
+        { label: 'Light', value: Number(this.currentSession.light_sleep_minutes || 0), color: '#6D75B0' },
+        { label: 'Awake', value: Number(this.currentSession.awake_minutes || 0), color: '#C5C6D0' }
       ]
+    },
+    timeline() {
+      const total = this.sleepStages.reduce((sum, item) => sum + item.value, 0);
+      if (!total) {
+        return [{ width: '100%', color: '#6D75B0' }];
+      }
+      return this.sleepStages
+        .filter((item) => item.value > 0)
+        .map((item) => ({
+          width: `${(item.value / total) * 100}%`,
+          color: item.color,
+        }));
     }
   },
+  async mounted() {
+    await this.loadSessions();
+  },
   methods: {
-    selectSession(date) {
-      this.currentSessionDate = date
+    async loadSessions() {
+      this.isLoading = true;
+      const token = localStorage.getItem('sessionToken');
+      if (!token) {
+        this.sessions = [];
+        this.currentSessionKey = '';
+        this.isLoading = false;
+        return;
+      }
+      try {
+        const rows = await fetchWhoopSleepHistory(token);
+        const mapped = (Array.isArray(rows) ? rows : [])
+          .filter((session) => !this.isNap(session))
+          .sort((a, b) => {
+            const wa = new Date(a.wake_time || a.bedtime || 0).getTime();
+            const wb = new Date(b.wake_time || b.bedtime || 0).getTime();
+            return wb - wa;
+          });
+        this.sessions = mapped;
+        this.currentSessionKey = mapped[0] ? this.sessionKey(mapped[0]) : '';
+      } catch (error) {
+        console.error('Failed to load individual sessions:', error);
+        this.sessions = [];
+        this.currentSessionKey = '';
+      } finally {
+        this.isLoading = false;
+      }
     },
-    formatHours(hours) {
-      const wholeHours = Math.floor(hours)
-      const minutes = Math.round((hours - wholeHours) * 60)
-      return `${wholeHours}h ${minutes}m`
+    isNap(session) {
+      const n = session?.nap;
+      return n === true || n === 1 || n === '1';
+    },
+    sessionKey(session) {
+      return `${session.id || ''}-${session.date || ''}-${session.bedtime || ''}-${session.wake_time || ''}`
+    },
+    selectSession(session) {
+      this.currentSessionKey = this.sessionKey(session)
+    },
+    formatDuration(minutes) {
+      const n = Number(minutes || 0);
+      const h = Math.floor(n / 60);
+      const m = Math.round(n % 60);
+      return `${h}h ${m}m`;
     },
     formatTime(time) {
-      const [hours, minutes] = time.split(':').map(Number)
-      const suffix = hours >= 12 ? 'PM' : 'AM'
-      const convertedHours = hours % 12 || 12
-      return `${convertedHours}:${String(minutes).padStart(2, '0')} ${suffix}`
+      if (!time) return '--:--';
+      const date = new Date(time);
+      if (Number.isNaN(date.getTime())) return '--:--';
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     },
     formatLongDate(date) {
-      return new Date(date).toLocaleDateString('en-GB', {
+      const d = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T12:00:00`) : new Date(date);
+      if (Number.isNaN(d.getTime())) return String(date || '');
+      return d.toLocaleDateString('en-GB', {
         weekday: 'long',
         day: 'numeric',
-        month: 'long'
+        month: 'long',
+        year: 'numeric'
       })
     },
-    formatSessionButton(date) {
-      return new Date(date).toLocaleDateString('en-GB', {
+    formatSessionButton(session) {
+      const date = session?.date;
+      const d = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T12:00:00`) : new Date(date);
+      if (Number.isNaN(d.getTime())) return 'Unknown';
+      return d.toLocaleDateString('en-GB', {
         day: 'numeric',
         month: 'short'
       })
     },
+    formatPercent(value) {
+      if (value == null || value === '') return '--';
+      let n = Number(value);
+      if (Number.isNaN(n)) return '--';
+      if (n > 0 && n <= 1) n *= 100;
+      return `${Math.round(n)}%`;
+    },
+    formatRespiratoryRate(value) {
+      if (value == null || value === '') return '--';
+      const n = Number(value);
+      if (Number.isNaN(n)) return '--';
+      return `${n.toFixed(1)} rpm`;
+    },
     scoreLabel(score) {
+      if (score == null || score === '') return 'Unavailable';
       if (score >= 85) return 'Excellent'
       if (score >= 75) return 'Good'
       if (score >= 60) return 'Fair'
@@ -249,4 +315,3 @@ export default {
   }
 }
 </script> 
-<!-- what do i do now -->
