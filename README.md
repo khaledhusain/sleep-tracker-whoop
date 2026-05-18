@@ -45,11 +45,21 @@ The app was built as a collaborative software engineering project. My focus was 
 
 ### Dashboard
 
-### Sleep Data Table
+Overview of recent sleep with last-night summary, stage breakdown, timeframe filters (night / 7 days / 30 days), and Whoop connection and sync controls.
+
+<img src="screenshots/dashboard.png" width="900" alt="Sleep Tracker dashboard showing last night summary and Whoop sync" />
 
 ### Heatmap
 
+Calendar heatmap of sleep performance scores by day, with month navigation and a side panel for the selected date.
+
+<img src="screenshots/heatmap.png" width="900" alt="Sleep score heatmap calendar view" />
+
 ### Manual Entry
+
+Add Sleep form on the Sleep Entries page: pick date and bed/wake times to log a session without Whoop.
+
+<img src="screenshots/manual-sleep.png" width="900" alt="Manual sleep entry form with date and time pickers" />
 
 ---
 
