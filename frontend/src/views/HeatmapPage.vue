@@ -1,43 +1,6 @@
 <template>
-  <div class="flex w-full flex-1 flex-col pb-6">
+  <div class="flex w-full flex-1 flex-col pb-6 [overflow-anchor:none]">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-1.5 sm:gap-2">
-      <header class="flex justify-between items-center mt-0 flex-wrap gap-4 shrink-0">
-        
-      </header>
-
-      <div class="shrink-0">
-        <div class="flex items-center justify-center gap-2 sm:gap-3">
-          <button
-            type="button"
-            class="rounded-lg border border-blue-4/40 bg-blue-3/50 p-1.5 text-purple transition hover:border-purple/50 hover:bg-blue-4/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purple/60 disabled:opacity-40 sm:p-2"
-            :disabled="loading"
-            aria-label="Previous month"
-            @click="shiftMonth(-1)"
-          >
-            <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <span class="min-w-[9rem] text-center text-sm font-semibold tabular-nums text-white sm:min-w-[11rem] sm:text-base">
-            {{ monthTitle }}
-          </span>
-          <button
-            type="button"
-            class="rounded-lg border border-blue-4/40 bg-blue-3/50 p-1.5 text-purple transition hover:border-purple/50 hover:bg-blue-4/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purple/60 disabled:opacity-40 sm:p-2"
-            :disabled="loading"
-            aria-label="Next month"
-            @click="shiftMonth(1)"
-          >
-            <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-        <p v-if="monthSummary.label" class="mt-1 text-center text-[0.7rem] text-grey-1 sm:text-xs">
-          {{ monthSummary.label }}
-        </p>
-      </div>
-
       <p
         v-if="error"
         class="mb-3 rounded-xl border border-[#f87171]/40 bg-[#f87171]/10 px-3 py-2 text-sm text-[#fca5a5]"
@@ -46,20 +9,56 @@
       </p>
 
       <div
-        v-if="loading"
-        class="flex min-h-[240px] flex-col items-center justify-center text-grey-1"
+        class="relative grid min-h-[34rem] grid-cols-1 items-start gap-5 max-[900px]:max-h-none min-[901px]:grid-cols-[minmax(0,1fr)_30rem]"
       >
-        <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-3 border-t-purple" />
-        <p class="mt-2 text-sm">Loading month…</p>
-      </div>
+        <div
+          v-if="loading && !hasLoadedMonth"
+          class="absolute inset-0 z-30 flex min-h-[34rem] flex-col items-center justify-center rounded-2xl border border-blue-4/20 bg-blue-1/85 text-grey-1 backdrop-blur-[2px]"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-3 border-t-purple" />
+          <p class="mt-2 text-sm">Loading month…</p>
+        </div>
 
-      <div
-        v-else
-        class="grid grid-cols-1 items-start gap-5 max-[900px]:max-h-none min-[901px]:grid-cols-[minmax(0,1fr)_30rem]"
-      >
         <div
           class="min-w-0 w-full max-w-full overflow-hidden rounded-2xl border border-blue-4/30 bg-[rgb(3_23_77/0.52)] p-5 shadow-[0_4px_30px_rgba(3,23,77,0.35)]"
         >
+          <div ref="monthNav" class="mb-5 flex justify-center [overflow-anchor:none]">
+            <div class="flex flex-col items-center gap-1">
+              <div class="flex items-center gap-2 sm:gap-3">
+                <button
+                  type="button"
+                  class="rounded-lg border border-blue-4/40 bg-blue-3/50 p-1.5 text-purple transition hover:border-purple/50 hover:bg-blue-4/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purple/60 disabled:opacity-40 sm:p-2"
+                  :disabled="loading"
+                  aria-label="Previous month"
+                  @click="shiftMonth(-1)"
+                >
+                  <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <span class="min-w-[7.5rem] text-center text-sm font-semibold tabular-nums text-white sm:min-w-[9rem] sm:text-base">
+                  {{ monthTitle }}
+                </span>
+                <button
+                  type="button"
+                  class="rounded-lg border border-blue-4/40 bg-blue-3/50 p-1.5 text-purple transition hover:border-purple/50 hover:bg-blue-4/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purple/60 disabled:opacity-40 sm:p-2"
+                  :disabled="loading"
+                  aria-label="Next month"
+                  @click="shiftMonth(1)"
+                >
+                  <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+              <p v-if="monthSummary.label" class="text-[0.7rem] text-grey-1 sm:text-xs">
+                {{ monthSummary.label }}
+              </p>
+            </div>
+          </div>
+
           <div class="grid grid-cols-7 gap-2.5 min-[901px]:gap-3">
             <div
               v-for="wd in weekDays"
@@ -295,7 +294,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { fetchSleepData } from '@/services/sleep.service';
 import {
   buildDayEntryMap,
@@ -316,10 +315,13 @@ const viewYear = ref(now.getFullYear());
 const viewMonth = ref(now.getMonth());
 
 const loading = ref(true);
+const hasLoadedMonth = ref(false);
 const error = ref('');
 const rawEntries = ref([]);
 const dayMap = ref(new Map());
 const selectedDayKey = ref(null);
+const monthNav = ref(null);
+let monthNavViewportTop = null;
 
 const monthTitle = computed(() =>
   new Date(viewYear.value, viewMonth.value, 1).toLocaleString(undefined, {
@@ -478,7 +480,7 @@ function cellButtonClass(cell) {
 
   let ring = '';
   if (sel) {
-    ring = 'z-10 !border-[3px] !border-sky-400';
+    ring = 'z-10 !border-[3px] !border-white';
   } else if (today) {
     ring = 'ring-1 ring-white/35 ring-inset';
   }
@@ -492,9 +494,24 @@ function onDayClick(cell) {
 }
 
 function shiftMonth(delta) {
+  monthNavViewportTop = monthNav.value?.getBoundingClientRect().top ?? null;
   const d = new Date(viewYear.value, viewMonth.value + delta, 1);
   viewYear.value = d.getFullYear();
   viewMonth.value = d.getMonth();
+}
+
+async function restoreMonthNavViewportPosition() {
+  if (monthNavViewportTop == null || !monthNav.value) return;
+
+  await nextTick();
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+
+  const currentTop = monthNav.value.getBoundingClientRect().top;
+  const scrollCorrection = currentTop - monthNavViewportTop;
+  if (Math.abs(scrollCorrection) > 0.5) {
+    window.scrollBy({ top: scrollCorrection, left: 0, behavior: 'auto' });
+  }
+  monthNavViewportTop = null;
 }
 
 function syncSelectionToMonth() {
@@ -522,12 +539,14 @@ async function loadMonth() {
     dayMap.value = new Map();
   } finally {
     loading.value = false;
+    hasLoadedMonth.value = true;
   }
 }
 
 watch([viewYear, viewMonth], async () => {
   await loadMonth();
   syncSelectionToMonth();
+  await restoreMonthNavViewportPosition();
 });
 
 onMounted(async () => {
