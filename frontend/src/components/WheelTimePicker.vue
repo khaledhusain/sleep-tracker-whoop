@@ -139,6 +139,12 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const rootRef = ref(null);
+/**
+ * Update the visible wheel value synchronously. Waiting for the parent v-model
+ * round-trip leaves one frame where the track has snapped back but the rows
+ * still contain the previous value.
+ */
+const displayValue = ref(clampTotalMins(props.modelValue));
 /** Which column arrow keys adjust: hour, minute, or am/pm */
 const focusCol = ref('minute');
 /** Nudge the next @click on a value cell (after a press-drag) so the release doesn’t add an extra nudge. */
@@ -147,7 +153,7 @@ const suppressNextCellClick = ref(false);
 const DRAG_NUDGE_PX = 32;
 const DRAG_TAP_PX = 6;
 /** Must match `.wheel-picker__col-track` transition duration for slot-step animation. */
-const SLOT_STEP_MS = 320;
+const SLOT_STEP_MS = 180;
 
 let colDragUnbind = null;
 
@@ -164,10 +170,11 @@ const colStepAnim = reactive({ hour: 0, minute: 0, ampm: 0 });
 const colStepSnap = reactive({ hour: false, minute: false, ampm: false });
 const colStepBusy = reactive({ hour: false, minute: false, ampm: false });
 const colStepTimer = reactive({ hour: null, minute: null, ampm: null });
-/** `apply` passed to the in-flight step (used if a second nudge arrives before the timeout). */
-const colStepPendingApply = { hour: null, minute: null, ampm: null };
+/** Invalidates stale animation frames when rapid input restarts a column animation. */
+const colStepGeneration = { hour: 0, minute: 0, ampm: 0 };
 
 function clearColStepAnim(col) {
+  colStepGeneration[col] += 1;
   const t = colStepTimer[col];
   if (t != null) {
     clearTimeout(t);
@@ -176,7 +183,6 @@ function clearColStepAnim(col) {
   colStepAnim[col] = 0;
   colStepBusy[col] = false;
   colStepSnap[col] = false;
-  colStepPendingApply[col] = null;
 }
 
 function clearAllColStepAnim() {
@@ -201,7 +207,7 @@ function colTrackStyle(col) {
   const snap = colStepSnap[col];
   return {
     transform: `translate3d(0, ${-y}px, 0)`,
-    transition: followFinger || snap ? 'none' : 'transform 0.32s cubic-bezier(0.2, 0.85, 0.22, 1)',
+    transition: followFinger || snap ? 'none' : 'transform 0.18s cubic-bezier(0.2, 0.85, 0.22, 1)',
   };
 }
 
@@ -214,45 +220,41 @@ function runSlotStepAnim(col, dir, apply) {
     apply();
     return;
   }
+
   const slot = slotPx.value;
   if (!slot || slot < 8) {
     apply();
     return;
   }
-  if (colStepBusy[col]) {
-    const pending = colStepPendingApply[col];
-    if (colStepTimer[col] != null) {
-      clearTimeout(colStepTimer[col]);
-      colStepTimer[col] = null;
-    }
-    colStepAnim[col] = 0;
-    colStepBusy[col] = false;
-    colStepSnap[col] = false;
-    colStepPendingApply[col] = null;
-    pending?.();
-    apply();
-    return;
+
+  const generation = ++colStepGeneration[col];
+  if (colStepTimer[col] != null) {
+    clearTimeout(colStepTimer[col]);
+    colStepTimer[col] = null;
   }
+
+  /*
+   * FLIP the newly applied value in from the adjacent slot. The model changes
+   * immediately, while rapid input simply restarts this short visual motion
+   * instead of building a delayed queue.
+   */
   colStepBusy[col] = true;
-  colStepPendingApply[col] = apply;
-  colStepAnim[col] = 0;
-  colStepSnap[col] = false;
+  colStepSnap[col] = true;
+  apply();
+  colStepAnim[col] = -dir * slot;
+
   nextTick(() => {
     requestAnimationFrame(() => {
-      colStepAnim[col] = dir * slot;
-      colStepTimer[col] = window.setTimeout(() => {
-        colStepTimer[col] = null;
-        colStepPendingApply[col] = null;
-        colStepSnap[col] = true;
-        apply();
+      requestAnimationFrame(() => {
+        if (colStepGeneration[col] !== generation) return;
+        colStepSnap[col] = false;
         colStepAnim[col] = 0;
-        nextTick(() => {
-          nextTick(() => {
-            colStepSnap[col] = false;
-            colStepBusy[col] = false;
-          });
-        });
-      }, SLOT_STEP_MS);
+        colStepTimer[col] = window.setTimeout(() => {
+          if (colStepGeneration[col] !== generation) return;
+          colStepTimer[col] = null;
+          colStepBusy[col] = false;
+        }, SLOT_STEP_MS);
+      });
     });
   });
 }
@@ -290,13 +292,23 @@ function fromParts(h12, min, ampm) {
 }
 
 function setTotal(mins) {
-  emit('update:modelValue', clampTotalMins(mins));
+  const next = clampTotalMins(mins);
+  displayValue.value = next;
+  emit('update:modelValue', next);
 }
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    const next = clampTotalMins(value);
+    if (next !== displayValue.value) displayValue.value = next;
+  }
+);
 
 const HOUR_MINUTE_DELTAS = [-3, -2, -1, 0, 1, 2, 3];
 
 const hourRows = computed(() => {
-  const { h12 } = toParts(props.modelValue);
+  const { h12 } = toParts(displayValue.value);
   const idx = h12 - 1;
   return HOUR_MINUTE_DELTAS.map((delta) => {
     const i = ((idx + delta) % 12 + 12) % 12;
@@ -305,7 +317,7 @@ const hourRows = computed(() => {
 });
 
 const minuteRows = computed(() => {
-  const { min } = toParts(props.modelValue);
+  const { min } = toParts(displayValue.value);
   const idx = min / STEP;
   return HOUR_MINUTE_DELTAS.map((delta) => {
     const i = ((idx + delta) % 12 + 12) % 12;
@@ -319,7 +331,7 @@ const minuteRows = computed(() => {
  * up with the center highlight, matching the taller hour/minute stacks.
  */
 const ampmLayoutRows = computed(() => {
-  const { ampm } = toParts(props.modelValue);
+  const { ampm } = toParts(displayValue.value);
   if (ampm === 0) {
     return [
       { kind: 'spacer', key: 'a-sp-0' },
@@ -356,14 +368,14 @@ function cellClass(delta) {
 }
 
 function applyHourDelta(deltaSteps) {
-  const { h12, min, ampm } = toParts(props.modelValue);
+  const { h12, min, ampm } = toParts(displayValue.value);
   let idx = h12 - 1;
   idx = ((idx + deltaSteps) % 12 + 12) % 12;
   setTotal(fromParts(idx + 1, min, ampm));
 }
 
 function applyMinuteDelta(deltaSteps) {
-  const { h12, min, ampm } = toParts(props.modelValue);
+  const { h12, min, ampm } = toParts(displayValue.value);
   let idx = min / STEP;
   idx = ((idx + deltaSteps) % 12 + 12) % 12;
   setTotal(fromParts(h12, idx * STEP, ampm));
@@ -371,7 +383,7 @@ function applyMinuteDelta(deltaSteps) {
 
 function applyAmpmDelta(deltaSteps) {
   if (deltaSteps === 0) return;
-  const { h12, min, ampm } = toParts(props.modelValue);
+  const { h12, min, ampm } = toParts(displayValue.value);
   if (deltaSteps > 0) {
     if (ampm >= 1) return;
     setTotal(fromParts(h12, min, 1));
@@ -382,7 +394,7 @@ function applyAmpmDelta(deltaSteps) {
 }
 
 function canNudgeAmpm(deltaSteps) {
-  const { ampm } = toParts(props.modelValue);
+  const { ampm } = toParts(displayValue.value);
   if (deltaSteps > 0) return ampm < 1;
   if (deltaSteps < 0) return ampm > 0;
   return false;
@@ -471,7 +483,7 @@ function onColDragStart(col, e) {
     // Invert from raw pointer delta: drag up → +1, drag down → -1 (matches wheel / “flick the wheel up”).
     acc -= dy;
     if (col === 'ampm') {
-      const { ampm } = toParts(props.modelValue);
+      const { ampm } = toParts(displayValue.value);
       if (ampm === 0) acc = Math.max(0, acc);
       else if (ampm === 1) acc = Math.min(0, acc);
     }
@@ -488,7 +500,7 @@ function onColDragStart(col, e) {
       nudgedByDrag = true;
     }
     if (col === 'ampm') {
-      const { ampm } = toParts(props.modelValue);
+      const { ampm } = toParts(displayValue.value);
       if (ampm === 0) acc = Math.max(0, acc);
       else if (ampm === 1) acc = Math.min(0, acc);
     }
