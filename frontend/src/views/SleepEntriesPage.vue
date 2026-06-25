@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <div class="flex w-full flex-col gap-8">
       
       <header class="flex justify-between items-center mt-6 flex-wrap gap-4">
         <div>

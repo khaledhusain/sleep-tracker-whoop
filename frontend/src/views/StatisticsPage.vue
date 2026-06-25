@@ -1,17 +1,9 @@
 <template>
-  <div class="relative flex min-h-screen flex-col overflow-hidden bg-blue-1 p-6 text-white">
-    <div
-      class="pointer-events-none absolute left-[-10%] top-[-5%] h-72 w-72 rounded-full bg-purple/20 blur-[110px]"
-      aria-hidden="true"
-    />
-    <div
-      class="pointer-events-none absolute bottom-[20%] right-[-10%] h-72 w-72 rounded-full bg-blue-4/20 blur-[110px]"
-      aria-hidden="true"
-    />
-
-    <div class="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-8">
+  <div class="relative flex min-h-screen flex-col overflow-hidden text-white">
+    <div class="relative z-10 flex w-full flex-col gap-8">
       <header class="mt-6 flex flex-wrap items-end justify-between gap-4">
         <div>
+          <h1 class="text-3xl font-extrabold tracking-tight text-purple">Statistics</h1>
         </div>
 
 
@@ -36,7 +28,7 @@
           <article
             v-for="kpi in kpis"
             :key="kpi.label"
-            class="flex min-h-44 flex-col rounded-2xl border border-blue-4/25 bg-blue-2/40 p-4 shadow-[0_4px_30px_rgba(3,23,77,0.35)]"
+            class="flex min-h-44 flex-col rounded-2xl border border-blue-4/25 bg-blue-1 p-4 shadow-[0_4px_30px_rgba(3,23,77,0.35)]"
           >
             <div class="flex items-center gap-2.5">
               <div
@@ -412,7 +404,7 @@
           <div
             v-for="n in 4"
             :key="n"
-            class="h-36 animate-pulse rounded-2xl border border-blue-4/20 bg-blue-2/35"
+            class="h-36 animate-pulse rounded-2xl border border-blue-4/20 bg-blue-1"
           />
         </div>
 
@@ -420,7 +412,7 @@
           <article
             v-for="insight in insights"
             :key="insight.title"
-            class="rounded-2xl border border-blue-4/25 bg-blue-2/35 p-5 shadow-[0_4px_24px_rgba(3,23,77,0.28)]"
+            class="rounded-2xl border border-blue-4/25 bg-blue-1 p-5 shadow-[0_4px_24px_rgba(3,23,77,0.28)]"
           >
             <div class="flex items-start gap-4">
               <div

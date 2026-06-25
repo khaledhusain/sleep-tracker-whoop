@@ -122,7 +122,7 @@
       <SleepDistributionHistogram
         class="bedtime-chart"
         kind="bedtime"
-        title="Bedtime Distribution"
+        title="Bedtime"
         icon="moon"
         accent="#a78bfa"
         metric-label="Typical Bedtime"
@@ -138,7 +138,7 @@
       <SleepDistributionHistogram
         class="wake-chart"
         kind="wake"
-        title="Wake Time Distribution"
+        title="Wake Time"
         icon="sun"
         accent="#38bdf8"
         metric-label="Typical Wake Time"

@@ -9,7 +9,7 @@
         >
           ◷
         </span>
-        <h3 class="text-sm font-bold text-white">Sleep Duration Distribution</h3>
+        <h3 class="text-sm font-bold text-white">Sleep Duration</h3>
       </div>
 
       <div class="flex gap-6">
@@ -30,7 +30,7 @@
 
     <div
       v-if="buckets.length"
-      class="mt-3 space-y-1"
+      class="mt-3 space-y-0.2"
       @mouseleave="hoveredKey = null"
     >
       <button

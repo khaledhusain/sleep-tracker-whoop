@@ -4,10 +4,10 @@
 
 @theme{
   /* colours */
-  --color-blue-1: #03174D;
-  --color-blue-2: #1F265E;
-  --color-blue-3: #2B3166;
-  --color-blue-4: #6D75B0;
+  --color-blue-1: #03174D; /*card colour*/
+  --color-blue-2: #16184f; /*main background*/
+  --color-blue-3: #222a71; /*profile and logo background*/
+  --color-blue-4: #6D75B0; /*card outline */
   --color-purple: #99A3FB;
 
   --color-grey-1: #C5C6D0;

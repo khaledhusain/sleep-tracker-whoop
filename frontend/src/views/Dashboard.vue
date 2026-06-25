@@ -1,13 +1,6 @@
 <template>
   <div class="relative overflow-hidden">
-    <div
-      class="absolute pointer-events-none top-[-10%] left-[-10%] z-0 h-64 w-64 rounded-full bg-purple/25 blur-[100px]"
-      aria-hidden="true"></div>
-    <div
-      class="absolute pointer-events-none bottom-[-10%] right-[-10%] z-0 h-64 w-64 rounded-full bg-blue-4/25 blur-[100px]"
-      aria-hidden="true"></div>
-
-    <div class="relative z-10 flex w-full max-w-4xl flex-col gap-8 mx-auto min-h-[12rem]">
+    <div class="relative z-10 flex min-h-[12rem] w-full flex-col gap-8">
 
       <header class="flex justify-between items-center mt-6 flex-wrap gap-4">
         <h1 class="text-3xl font-extrabold tracking-tight text-purple">Overview</h1>
